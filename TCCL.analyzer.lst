@@ -1,0 +1,23 @@
+
+// ==========================================================================
+//  GPLEX error listing for lex source file <TCCL.analyzer.lex>
+// ==========================================================================
+//  Version:  1.2.2
+//  Machine:  HPERSIMMON
+//  DateTime: 5/19/2017 10:32:57 AM
+//  UserName: amgrieco
+// ==========================================================================
+
+
+%namespace ASTBuilder
+%scannertype TCCLScanner
+%visibility internal
+%tokentype Token 
+
+%option stack, minimize, parser, verbose, persistbuffer, noembedbuffers 
+
+//Subtitute you .lex file for this one//-----------------------------------
+// Error: Parser error <Syntax error, unexpected EOF> 
+// ---------------------------------------------------
+// ==========================================================================
+

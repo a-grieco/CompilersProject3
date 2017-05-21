@@ -1,0 +1,16 @@
+public class good1p {
+
+   public static void outInt(int n) {
+     java.io.PrintStream ps;
+     ps = java.lang.System.out;
+     ps.print(n);
+   }
+
+   public static void main431() {
+     int w,x;
+     string s;
+     s = "i am a literal thing";
+     x = 3+4;  TestClasses.good1p.outInt(x);
+     x = 5*7;  TestClasses.good1p.outInt(x);
+   }
+}
