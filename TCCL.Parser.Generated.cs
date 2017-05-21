@@ -4,9 +4,9 @@
 
 // GPPG version 1.5.2
 // Machine:  HPERSIMMON
-// DateTime: 5/20/2017 9:16:09 PM
+// DateTime: 5/21/2017 12:56:27 PM
 // UserName: amgrieco
-// Input file <TCCL.grammar.y - 5/20/2017 9:16:08 PM>
+// Input file <TCCL.grammar.y - 5/21/2017 12:56:26 PM>
 
 // options: no-lines gplex
 
@@ -52,8 +52,8 @@ public class ScanObj {
 [GeneratedCodeAttribute( "Gardens Point Parser Generator", "1.5.2")]
 public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 {
-  // Verbatim content from TCCL.grammar.y - 5/20/2017 9:16:08 PM
-  // End verbatim content from TCCL.grammar.y - 5/20/2017 9:16:08 PM
+  // Verbatim content from TCCL.grammar.y - 5/21/2017 12:56:26 PM
+  // End verbatim content from TCCL.grammar.y - 5/21/2017 12:56:26 PM
 
 #pragma warning disable 649
   private static Dictionary<int, string> aliases;
@@ -384,37 +384,37 @@ public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 { CurrentSemanticValue = new CompilationUnit(ValueStack[ValueStack.Depth-1]); }
         break;
       case 3: // ClassDeclaration -> Modifiers, CLASS, Identifier, ClassBody
-{ CurrentSemanticValue = FMNodes.MakeClassDeclaration(ValueStack[ValueStack.Depth-4], ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new ClassDeclaration(ValueStack[ValueStack.Depth-4], ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
         break;
       case 4: // Modifiers -> PUBLIC
-{ CurrentSemanticValue = FMNodes.MakeModifiers(FMNodes.ModifiersEnums.PUBLIC); }
+{ CurrentSemanticValue = new Modifiers(ModifiersEnums.PUBLIC); }
         break;
       case 5: // Modifiers -> PRIVATE
-{ CurrentSemanticValue = FMNodes.MakeModifiers(FMNodes.ModifiersEnums.PRIVATE); }
+{ CurrentSemanticValue = new Modifiers(ModifiersEnums.PRIVATE); }
         break;
       case 6: // Modifiers -> STATIC
-{ CurrentSemanticValue = FMNodes.MakeModifiers(FMNodes.ModifiersEnums.STATIC); }
+{ CurrentSemanticValue = new Modifiers(ModifiersEnums.STATIC); }
         break;
       case 7: // Modifiers -> Modifiers, PUBLIC
-{ CurrentSemanticValue = FMNodes.MakeModifiers(ValueStack[ValueStack.Depth-2], FMNodes.ModifiersEnums.PUBLIC); }
+{ ((Modifiers)ValueStack[ValueStack.Depth-2]).AddModifier(ModifiersEnums.PUBLIC); CurrentSemanticValue = ValueStack[ValueStack.Depth-2]; }
         break;
       case 8: // Modifiers -> Modifiers, PRIVATE
-{ CurrentSemanticValue = FMNodes.MakeModifiers(ValueStack[ValueStack.Depth-2], FMNodes.ModifiersEnums.PRIVATE); }
+{ ((Modifiers)ValueStack[ValueStack.Depth-2]).AddModifier(ModifiersEnums.PRIVATE); CurrentSemanticValue = ValueStack[ValueStack.Depth-2]; }
         break;
       case 9: // Modifiers -> Modifiers, STATIC
-{ CurrentSemanticValue = FMNodes.MakeModifiers(ValueStack[ValueStack.Depth-2], FMNodes.ModifiersEnums.STATIC); }
+{ ((Modifiers)ValueStack[ValueStack.Depth-2]).AddModifier(ModifiersEnums.STATIC); CurrentSemanticValue = ValueStack[ValueStack.Depth-2]; }
         break;
       case 10: // ClassBody -> LBRACE, FieldDeclarations, RBRACE
-{ CurrentSemanticValue = FMNodes.MakeClassBody(ValueStack[ValueStack.Depth-2]); }
+{ CurrentSemanticValue = new ClassBody(ValueStack[ValueStack.Depth-2]); }
         break;
       case 11: // ClassBody -> LBRACE, RBRACE
-{ CurrentSemanticValue = FMNodes.MakeClassBody(); }
+{ CurrentSemanticValue = new ClassBody(); }
         break;
       case 12: // FieldDeclarations -> FieldDeclaration
-{ CurrentSemanticValue = FMNodes.MakeFieldDeclarations(ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new FieldDeclarations(ValueStack[ValueStack.Depth-1]); }
         break;
       case 13: // FieldDeclarations -> FieldDeclarations, FieldDeclaration
-{ CurrentSemanticValue = FMNodes.MakeFieldDeclarations(ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
+{ ((FieldDeclarations)ValueStack[ValueStack.Depth-2]).AddFieldDeclaration(ValueStack[ValueStack.Depth-1]); CurrentSemanticValue = ValueStack[ValueStack.Depth-2]; }
         break;
       case 14: // FieldDeclaration -> FieldVariableDeclaration, SEMICOLON
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-2]; }
@@ -432,10 +432,10 @@ public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
         break;
       case 19: // StructDeclaration -> Modifiers, STRUCT, Identifier, ClassBody
-{ CurrentSemanticValue = FMNodes.MakeStructDeclaration(ValueStack[ValueStack.Depth-4], ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new StructDeclaration(ValueStack[ValueStack.Depth-4], ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
         break;
       case 20: // FieldVariableDeclaration -> Modifiers, TypeSpecifier, FieldVariableDeclarators
-{ CurrentSemanticValue = FMNodes.MakeFieldVariableDeclaration(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new FieldVariableDeclaration(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
         break;
       case 21: // TypeSpecifier -> TypeName
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
@@ -450,47 +450,47 @@ public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
         break;
       case 25: // ArraySpecifier -> TypeName, LBRACKET, RBRACKET
-{ CurrentSemanticValue = FMNodes.MakeArraySpecifier(ValueStack[ValueStack.Depth-3]); }
+{ CurrentSemanticValue = new ArraySpecifier(ValueStack[ValueStack.Depth-3]); }
         break;
       case 26: // PrimitiveType -> BOOLEAN
-{ CurrentSemanticValue = FMNodes.MakePrimitiveTypeBoolean(); }
+{ CurrentSemanticValue = new PrimitiveTypeBoolean(); }
         break;
       case 27: // PrimitiveType -> INT
-{ CurrentSemanticValue = FMNodes.MakePrimitiveTypeInt(); }
+{ CurrentSemanticValue = new PrimitiveTypeInt(); }
         break;
       case 28: // PrimitiveType -> VOID
-{ CurrentSemanticValue = FMNodes.MakePrimitiveTypeVoid(); }
+{ CurrentSemanticValue = new PrimitiveTypeVoid(); }
         break;
       case 29: // FieldVariableDeclarators -> FieldVariableDeclaratorName
-{ CurrentSemanticValue = FMNodes.MakeFieldVariableDeclarators(ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new FieldVariableDeclarators(ValueStack[ValueStack.Depth-1]); }
         break;
       case 30: // FieldVariableDeclarators -> FieldVariableDeclarators, COMMA, 
                //                             FieldVariableDeclaratorName
-{ CurrentSemanticValue = FMNodes.MakeFieldVariableDeclarators(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-1]); }
+{ ((FieldVariableDeclarators)ValueStack[ValueStack.Depth-3]).AddFieldVariableDeclaratorName(ValueStack[ValueStack.Depth-1]); CurrentSemanticValue = ValueStack[ValueStack.Depth-3]; }
         break;
       case 31: // MethodDeclaration -> Modifiers, TypeSpecifier, MethodDeclarator, MethodBody
-{ CurrentSemanticValue = FMNodes.MakeMethodDeclaration(ValueStack[ValueStack.Depth-4], ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new MethodDeclaration(ValueStack[ValueStack.Depth-4], ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
         break;
       case 32: // MethodDeclarator -> MethodDeclaratorName, LPAREN, ParameterList, RPAREN
-{ CurrentSemanticValue = FMNodes.MakeMethodDeclarator(ValueStack[ValueStack.Depth-4], ValueStack[ValueStack.Depth-2]); }
+{ CurrentSemanticValue = new MethodDeclarator(ValueStack[ValueStack.Depth-4], ValueStack[ValueStack.Depth-2]); }
         break;
       case 33: // MethodDeclarator -> MethodDeclaratorName, LPAREN, RPAREN
-{ CurrentSemanticValue = FMNodes.MakeMethodDeclarator(ValueStack[ValueStack.Depth-3]); }
+{ CurrentSemanticValue = new MethodDeclarator(ValueStack[ValueStack.Depth-3]); }
         break;
       case 34: // ParameterList -> Parameter
-{ CurrentSemanticValue = FMNodes.MakeParameterList(ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new ParameterList(ValueStack[ValueStack.Depth-1]); }
         break;
       case 35: // ParameterList -> ParameterList, COMMA, Parameter
-{ CurrentSemanticValue = FMNodes.MakeParameterList(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-1]); }
+{ ((ParameterList)ValueStack[ValueStack.Depth-3]).AddParameter(ValueStack[ValueStack.Depth-1]); CurrentSemanticValue = ValueStack[ValueStack.Depth-3]; }
         break;
       case 36: // Parameter -> TypeSpecifier, DeclaratorName
-{ CurrentSemanticValue = FMNodes.MakeParameter(ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Parameter(ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
         break;
       case 37: // QualifiedName -> Identifier
-{ CurrentSemanticValue = FMNodes.MakeQualifiedName(ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new QualifiedName(ValueStack[ValueStack.Depth-1]); }
         break;
       case 38: // QualifiedName -> QualifiedName, PERIOD, Identifier
-{ CurrentSemanticValue = FMNodes.MakeQualifiedName(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-1]); }
+{ ((QualifiedName)ValueStack[ValueStack.Depth-3]).AddIdentifier(ValueStack[ValueStack.Depth-1]); CurrentSemanticValue = ValueStack[ValueStack.Depth-3]; }
         break;
       case 39: // DeclaratorName -> Identifier
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
@@ -508,24 +508,24 @@ public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
         break;
       case 44: // ConstructorDeclaration -> Modifiers, MethodDeclarator, Block
-{ CurrentSemanticValue = FMNodes.MakeConstructorDeclaration(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new ConstructorDeclaration(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
         break;
       case 45: // StaticInitializer -> STATIC, Block
-{ CurrentSemanticValue = FMNodes.MakeStaticInitializer(ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new StaticInitializer(ValueStack[ValueStack.Depth-1]); }
         break;
       case 46: // Block -> LBRACE, LocalVariableDeclarationsAndStatements, RBRACE
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-2]; }
         break;
       case 47: // Block -> LBRACE, RBRACE
-{ CurrentSemanticValue = FMNodes.MakeBlock(); }
+{ CurrentSemanticValue = new Block(); }
         break;
       case 48: // LocalVariableDeclarationsAndStatements -> LocalVariableDeclarationOrStatement
-{ CurrentSemanticValue = FMNodes.MakeBlock(ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Block(ValueStack[ValueStack.Depth-1]); }
         break;
       case 49: // LocalVariableDeclarationsAndStatements -> 
                //                                           LocalVariableDeclarationsAndStatements, 
                //                                           LocalVariableDeclarationOrStatement
-{ CurrentSemanticValue = FMNodes.MakeBlock(ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]); }
+{ ((Block)ValueStack[ValueStack.Depth-2]).AddLocalVarDeclStmt(ValueStack[ValueStack.Depth-1]); CurrentSemanticValue = ValueStack[ValueStack.Depth-2]; }
         break;
       case 50: // LocalVariableDeclarationOrStatement -> LocalVariableDeclarationStatement
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
@@ -535,17 +535,17 @@ public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
         break;
       case 52: // LocalVariableDeclarationStatement -> TypeSpecifier, LocalVariableDeclarators, 
                //                                      SEMICOLON
-{ CurrentSemanticValue = FMNodes.MakeLocalVariableDeclarationStatement(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-2]); }
+{ CurrentSemanticValue = new LocalVariableDeclarationStatement(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-2]); }
         break;
       case 53: // LocalVariableDeclarationStatement -> StructDeclaration
-{ CurrentSemanticValue = FMNodes.MakeLocalVariableDeclarationStatement(ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new LocalVariableDeclarationStatement(ValueStack[ValueStack.Depth-1]); }
         break;
       case 54: // LocalVariableDeclarators -> LocalVariableDeclaratorName
-{ CurrentSemanticValue = FMNodes.MakeLocalVariableDeclarators(ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new LocalVariableDeclarators(ValueStack[ValueStack.Depth-1]); }
         break;
       case 55: // LocalVariableDeclarators -> LocalVariableDeclarators, COMMA, 
                //                             LocalVariableDeclaratorName
-{ CurrentSemanticValue = FMNodes.MakeLocalVariableDeclarators(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-1]); }
+{ ((LocalVariableDeclarators)ValueStack[ValueStack.Depth-3]).AddLocalVariableDeclaratorName(ValueStack[ValueStack.Depth-1]); CurrentSemanticValue = ValueStack[ValueStack.Depth-3]; }
         break;
       case 56: // Statement -> EmptyStatement
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
@@ -566,95 +566,95 @@ public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
         break;
       case 62: // EmptyStatement -> SEMICOLON
-{ CurrentSemanticValue = FMNodes.MakeEmptyStatement( ); }
+{ CurrentSemanticValue = new EmptyStatement( ); }
         break;
       case 63: // ExpressionStatement -> Expression
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
         break;
       case 64: // SelectionStatement -> IF, LPAREN, Expression, RPAREN, Statement, ELSE, 
                //                       Statement
-{ CurrentSemanticValue = FMNodes.MakeSelectionStatement(ValueStack[ValueStack.Depth-5], ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new SelectionStatement(ValueStack[ValueStack.Depth-5], ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-1]); }
         break;
       case 65: // SelectionStatement -> IF, LPAREN, Expression, RPAREN, Statement
-{ CurrentSemanticValue = FMNodes.MakeSelectionStatement(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new SelectionStatement(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-1]); }
         break;
       case 66: // IterationStatement -> WHILE, LPAREN, Expression, RPAREN, Statement
-{CurrentSemanticValue = FMNodes.MakeIterationStatement(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-1]); }
+{CurrentSemanticValue = new IterationStatement(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-1]); }
         break;
       case 67: // ReturnStatement -> RETURN, Expression, SEMICOLON
-{ CurrentSemanticValue = FMNodes.MakeReturnStatement(ValueStack[ValueStack.Depth-2]); }
+{ CurrentSemanticValue = new ReturnStatement(ValueStack[ValueStack.Depth-2]); }
         break;
       case 68: // ReturnStatement -> RETURN, SEMICOLON
-{ CurrentSemanticValue = FMNodes.MakeReturnStatement(); }
+{ CurrentSemanticValue = new ReturnStatement(); }
         break;
       case 69: // ArgumentList -> Expression
-{ CurrentSemanticValue = FMNodes.MakeArgumentList(ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new ArgumentList(ValueStack[ValueStack.Depth-1]); }
         break;
       case 70: // ArgumentList -> ArgumentList, COMMA, Expression
-{ CurrentSemanticValue = FMNodes.MakeArgumentList(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-1]); }
+{ ((ArgumentList)ValueStack[ValueStack.Depth-3]).AddExpression(ValueStack[ValueStack.Depth-1]); CurrentSemanticValue = ValueStack[ValueStack.Depth-3]; }
         break;
       case 71: // Expression -> QualifiedName, EQUALS, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.EQUALS, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.EQUALS, ValueStack[ValueStack.Depth-1]); }
         break;
       case 72: // Expression -> Expression, OP_LOR, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.OP_LOR, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.OP_LOR, ValueStack[ValueStack.Depth-1]); }
         break;
       case 73: // Expression -> Expression, OP_LAND, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.OP_LAND, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.OP_LAND, ValueStack[ValueStack.Depth-1]); }
         break;
       case 74: // Expression -> Expression, PIPE, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.PIPE, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.PIPE, ValueStack[ValueStack.Depth-1]); }
         break;
       case 75: // Expression -> Expression, HAT, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.HAT, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.HAT, ValueStack[ValueStack.Depth-1]); }
         break;
       case 76: // Expression -> Expression, AND, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.AND, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.AND, ValueStack[ValueStack.Depth-1]); }
         break;
       case 77: // Expression -> Expression, OP_EQ, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.OP_EQ, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.OP_EQ, ValueStack[ValueStack.Depth-1]); }
         break;
       case 78: // Expression -> Expression, OP_NE, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.OP_NE, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.OP_NE, ValueStack[ValueStack.Depth-1]); }
         break;
       case 79: // Expression -> Expression, OP_GT, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.OP_GT, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.OP_GT, ValueStack[ValueStack.Depth-1]); }
         break;
       case 80: // Expression -> Expression, OP_LT, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.OP_LT, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.OP_LT, ValueStack[ValueStack.Depth-1]); }
         break;
       case 81: // Expression -> Expression, OP_LE, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.OP_LE, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.OP_LE, ValueStack[ValueStack.Depth-1]); }
         break;
       case 82: // Expression -> Expression, OP_GE, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.OP_GE, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.OP_GE, ValueStack[ValueStack.Depth-1]); }
         break;
       case 83: // Expression -> Expression, PLUSOP, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.PLUSOP, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.PLUSOP, ValueStack[ValueStack.Depth-1]); }
         break;
       case 84: // Expression -> Expression, MINUSOP, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.MINUSOP, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.MINUSOP, ValueStack[ValueStack.Depth-1]); }
         break;
       case 85: // Expression -> Expression, ASTERISK, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.ASTERISK, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.ASTERISK, ValueStack[ValueStack.Depth-1]); }
         break;
       case 86: // Expression -> Expression, RSLASH, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.RSLASH, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.RSLASH, ValueStack[ValueStack.Depth-1]); }
         break;
       case 87: // Expression -> Expression, PERCENT, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-3], FMNodes.ExpressionEnums.PERCENT, ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-3], ExpressionEnums.PERCENT, ValueStack[ValueStack.Depth-1]); }
         break;
       case 88: // Expression -> ArithmeticUnaryOperator, Expression
-{ CurrentSemanticValue = FMNodes.MakeExpression(ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1], yytext, FMNodes.ExpressionEnums.UNARY); }
+{ CurrentSemanticValue = new Expression(ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1], yytext, ExpressionEnums.UNARY); }
         break;
       case 89: // Expression -> PrimaryExpression
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
         break;
       case 90: // ArithmeticUnaryOperator -> PLUSOP
-{ CurrentSemanticValue = FMNodes.GetArithmeticUnaryOperator(FMNodes.ExpressionEnums.PLUSOP); }
+{ CurrentSemanticValue = new ArithmeticUnaryOperator(ExpressionEnums.PLUSOP); }
         break;
       case 91: // ArithmeticUnaryOperator -> MINUSOP
-{ CurrentSemanticValue = FMNodes.GetArithmeticUnaryOperator(FMNodes.ExpressionEnums.PLUSOP); }
+{ CurrentSemanticValue = new ArithmeticUnaryOperator(ExpressionEnums.PLUSOP); }
         break;
       case 92: // PrimaryExpression -> QualifiedName
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
@@ -675,7 +675,7 @@ public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
         break;
       case 98: // ComplexPrimaryNoParenthesis -> LITERAL
-{ CurrentSemanticValue = FMNodes.GetLiteral(yystringval); }
+{ CurrentSemanticValue = new Literal(yystringval); }
         break;
       case 99: // ComplexPrimaryNoParenthesis -> Number
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
@@ -687,13 +687,13 @@ public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
         break;
       case 102: // FieldAccess -> NotJustName, PERIOD, Identifier
-{ CurrentSemanticValue = FMNodes.MakeFieldAccess(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-1]); }
+{ CurrentSemanticValue = new FieldAccess(ValueStack[ValueStack.Depth-3], ValueStack[ValueStack.Depth-1]); }
         break;
       case 103: // MethodCall -> MethodReference, LPAREN, ArgumentList, RPAREN
-{ CurrentSemanticValue = FMNodes.MakeMethodCall(ValueStack[ValueStack.Depth-4], ValueStack[ValueStack.Depth-2]); }
+{ CurrentSemanticValue = new MethodCall(ValueStack[ValueStack.Depth-4], ValueStack[ValueStack.Depth-2]); }
         break;
       case 104: // MethodCall -> MethodReference, LPAREN, RPAREN
-{ CurrentSemanticValue = FMNodes.MakeMethodCall(ValueStack[ValueStack.Depth-3]); }
+{ CurrentSemanticValue = new MethodCall(ValueStack[ValueStack.Depth-3]); }
         break;
       case 105: // MethodReference -> ComplexPrimaryNoParenthesis
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
@@ -705,16 +705,16 @@ public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
         break;
       case 108: // SpecialName -> THIS
-{ CurrentSemanticValue = FMNodes.GetSpecialName(FMNodes.SpecialNameEnums.THIS); }
+{ CurrentSemanticValue = new SpecialName(SpecialNameEnums.THIS); }
         break;
       case 109: // SpecialName -> NULL
-{ CurrentSemanticValue = FMNodes.GetSpecialName(FMNodes.SpecialNameEnums.NULL); }
+{ CurrentSemanticValue = new SpecialName(SpecialNameEnums.NULL); }
         break;
       case 110: // Identifier -> IDENTIFIER
-{  CurrentSemanticValue = FMNodes.GetIdentifier(yytext); }
+{  CurrentSemanticValue = new Identifier(yytext); }
         break;
       case 111: // Number -> INT_NUMBER
-{ CurrentSemanticValue = FMNodes.GetNumber(yytext); }
+{ CurrentSemanticValue = new Number(yytext); }
         break;
     }
 #pragma warning restore 162, 1522

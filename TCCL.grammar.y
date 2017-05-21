@@ -35,23 +35,23 @@
 CompilationUnit		:	ClassDeclaration	{ $$ = new CompilationUnit($1); }
 					;
 
-ClassDeclaration	:	Modifiers CLASS Identifier ClassBody	{ $$ = FMNodes.MakeClassDeclaration($1, $3, $4); }
+ClassDeclaration	:	Modifiers CLASS Identifier ClassBody	{ $$ = new ClassDeclaration($1, $3, $4); }
 					;
 
-Modifiers			:	PUBLIC		{ $$ = FMNodes.MakeModifiers(FMNodes.ModifiersEnums.PUBLIC); }
-					|	PRIVATE		{ $$ = FMNodes.MakeModifiers(FMNodes.ModifiersEnums.PRIVATE); }
-					|	STATIC		{ $$ = FMNodes.MakeModifiers(FMNodes.ModifiersEnums.STATIC); }
-					|	Modifiers PUBLIC	{ $$ = FMNodes.MakeModifiers($1, FMNodes.ModifiersEnums.PUBLIC); }
-					|	Modifiers PRIVATE	{ $$ = FMNodes.MakeModifiers($1, FMNodes.ModifiersEnums.PRIVATE); }
-					|	Modifiers STATIC	{ $$ = FMNodes.MakeModifiers($1, FMNodes.ModifiersEnums.STATIC); }
+Modifiers			:	PUBLIC		{ $$ = new Modifiers(ModifiersEnums.PUBLIC); }
+					|	PRIVATE		{ $$ = new Modifiers(ModifiersEnums.PRIVATE); }
+					|	STATIC		{ $$ = new Modifiers(ModifiersEnums.STATIC); }
+					|	Modifiers PUBLIC	{ ((Modifiers)$1).AddModifier(ModifiersEnums.PUBLIC); $$ = $1; }
+					|	Modifiers PRIVATE	{ ((Modifiers)$1).AddModifier(ModifiersEnums.PRIVATE); $$ = $1; }
+					|	Modifiers STATIC	{ ((Modifiers)$1).AddModifier(ModifiersEnums.STATIC); $$ = $1; }
 					;
 
-ClassBody			:	LBRACE FieldDeclarations RBRACE	{ $$ = FMNodes.MakeClassBody($2); }
-					|	LBRACE RBRACE					{ $$ = FMNodes.MakeClassBody(); }
+ClassBody			:	LBRACE FieldDeclarations RBRACE	{ $$ = new ClassBody($2); }
+					|	LBRACE RBRACE					{ $$ = new ClassBody(); }
 					;
 
-FieldDeclarations	:	FieldDeclaration					{ $$ = FMNodes.MakeFieldDeclarations($1); }
-					|	FieldDeclarations FieldDeclaration	{ $$ = FMNodes.MakeFieldDeclarations($1, $2); }
+FieldDeclarations	:	FieldDeclaration					{ $$ = new FieldDeclarations($1); }
+					|	FieldDeclarations FieldDeclaration	{ ((FieldDeclarations)$1).AddFieldDeclaration($2); $$ = $1; }
 					;
 
 FieldDeclaration	:	FieldVariableDeclaration SEMICOLON	{ $$ = $1; }
@@ -61,7 +61,7 @@ FieldDeclaration	:	FieldVariableDeclaration SEMICOLON	{ $$ = $1; }
 					|	StructDeclaration					{ $$ = $1; }
 					;
 
-StructDeclaration	:	Modifiers STRUCT Identifier ClassBody	{ $$ = FMNodes.MakeStructDeclaration($1, $3, $4); }
+StructDeclaration	:	Modifiers STRUCT Identifier ClassBody	{ $$ = new StructDeclaration($1, $3, $4); }
 					;
 
 
@@ -73,7 +73,7 @@ StructDeclaration	:	Modifiers STRUCT Identifier ClassBody	{ $$ = FMNodes.MakeStr
  * here to get the information where you want it, so that the declarations can
  * be suitably annotated with their type and modifier information.
  */
-FieldVariableDeclaration	:	Modifiers TypeSpecifier FieldVariableDeclarators	{ $$ = FMNodes.MakeFieldVariableDeclaration($1, $2, $3); }
+FieldVariableDeclaration	:	Modifiers TypeSpecifier FieldVariableDeclarators	{ $$ = new FieldVariableDeclaration($1, $2, $3); }
 							;
 
 TypeSpecifier				:	TypeName		{ $$ = $1; }
@@ -84,35 +84,35 @@ TypeName					:	PrimitiveType	{ $$ = $1; }
 							|   QualifiedName	{ $$ = $1; }
 							;
 
-ArraySpecifier				: 	TypeName LBRACKET RBRACKET	{ $$ = FMNodes.MakeArraySpecifier($1); }
+ArraySpecifier				: 	TypeName LBRACKET RBRACKET	{ $$ = new ArraySpecifier($1); }
 							;
 							
-PrimitiveType				:	BOOLEAN	{ $$ = FMNodes.MakePrimitiveTypeBoolean(); }
-							|	INT		{ $$ = FMNodes.MakePrimitiveTypeInt(); }
-							|	VOID	{ $$ = FMNodes.MakePrimitiveTypeVoid(); }
+PrimitiveType				:	BOOLEAN	{ $$ = new PrimitiveTypeBoolean(); }
+							|	INT		{ $$ = new PrimitiveTypeInt(); }
+							|	VOID	{ $$ = new PrimitiveTypeVoid(); }
 							;
 
-FieldVariableDeclarators	:	FieldVariableDeclaratorName	{ $$ = FMNodes.MakeFieldVariableDeclarators($1); }
-							|   FieldVariableDeclarators COMMA FieldVariableDeclaratorName	{ $$ = FMNodes.MakeFieldVariableDeclarators($1, $3); }
+FieldVariableDeclarators	:	FieldVariableDeclaratorName	{ $$ = new FieldVariableDeclarators($1); }
+							|   FieldVariableDeclarators COMMA FieldVariableDeclaratorName	{ ((FieldVariableDeclarators)$1).AddFieldVariableDeclaratorName($3); $$ = $1; }
 							;
 
 
-MethodDeclaration			:	Modifiers TypeSpecifier MethodDeclarator MethodBody	{ $$ = FMNodes.MakeMethodDeclaration($1, $2, $3, $4); }
+MethodDeclaration			:	Modifiers TypeSpecifier MethodDeclarator MethodBody	{ $$ = new MethodDeclaration($1, $2, $3, $4); }
 							;
 							
-MethodDeclarator			:	MethodDeclaratorName LPAREN ParameterList RPAREN	{ $$ = FMNodes.MakeMethodDeclarator($1, $3); }
-							|   MethodDeclaratorName LPAREN RPAREN					{ $$ = FMNodes.MakeMethodDeclarator($1); }
+MethodDeclarator			:	MethodDeclaratorName LPAREN ParameterList RPAREN	{ $$ = new MethodDeclarator($1, $3); }
+							|   MethodDeclaratorName LPAREN RPAREN					{ $$ = new MethodDeclarator($1); }
 							;
 
-ParameterList				:	Parameter						{ $$ = FMNodes.MakeParameterList($1); }
-							|   ParameterList COMMA Parameter	{ $$ = FMNodes.MakeParameterList($1, $3); }
+ParameterList				:	Parameter						{ $$ = new ParameterList($1); }
+							|   ParameterList COMMA Parameter	{ ((ParameterList)$1).AddParameter($3); $$ = $1; }
 							;
 
-Parameter					:	TypeSpecifier DeclaratorName	{ $$ = FMNodes.MakeParameter($1, $2); }
+Parameter					:	TypeSpecifier DeclaratorName	{ $$ = new Parameter($1, $2); }
 							;
 
-QualifiedName				:	Identifier						{ $$ = FMNodes.MakeQualifiedName($1); }
-							|	QualifiedName PERIOD Identifier	{ $$ = FMNodes.MakeQualifiedName($1, $3); }
+QualifiedName				:	Identifier						{ $$ = new QualifiedName($1); }
+							|	QualifiedName PERIOD Identifier	{ ((QualifiedName)$1).AddIdentifier($3); $$ = $1; }
 							;
 
 DeclaratorName				:	Identifier	{ $$ = $1; }	
@@ -130,10 +130,10 @@ LocalVariableDeclaratorName	:	Identifier	{ $$ = $1; }
 MethodBody					:	Block		{ $$ = $1; }
 							;
 
-ConstructorDeclaration		:	Modifiers MethodDeclarator Block	{ $$ = FMNodes.MakeConstructorDeclaration($1, $2, $3); }
+ConstructorDeclaration		:	Modifiers MethodDeclarator Block	{ $$ = new ConstructorDeclaration($1, $2, $3); }
 							;
 
-StaticInitializer			:	STATIC Block	{ $$ = FMNodes.MakeStaticInitializer($2); }
+StaticInitializer			:	STATIC Block	{ $$ = new StaticInitializer($2); }
 							;
 		
 /*
@@ -141,26 +141,25 @@ StaticInitializer			:	STATIC Block	{ $$ = FMNodes.MakeStaticInitializer($2); }
  * For example:  int i;  i = 5;  int j = i;
  */
 Block						:	LBRACE LocalVariableDeclarationsAndStatements RBRACE	{ $$ = $2; }
-							|   LBRACE RBRACE	{ $$ = FMNodes.MakeBlock(); }
+							|   LBRACE RBRACE	{ $$ = new Block(); }
 							;
 
-LocalVariableDeclarationsAndStatements	:	LocalVariableDeclarationOrStatement	{ $$ = FMNodes.MakeBlock($1); }
-										|   LocalVariableDeclarationsAndStatements LocalVariableDeclarationOrStatement	{ $$ = FMNodes.MakeBlock($1, $2); }
+LocalVariableDeclarationsAndStatements	:	LocalVariableDeclarationOrStatement	{ $$ = new Block($1); }
+										|   LocalVariableDeclarationsAndStatements LocalVariableDeclarationOrStatement	{ ((Block)$1).AddLocalVarDeclStmt($2); $$ = $1; }
 										;
 
 LocalVariableDeclarationOrStatement	:	LocalVariableDeclarationStatement	{ $$ = $1; }
 									|   Statement							{ $$ = $1; }
 									;
 
-LocalVariableDeclarationStatement	:	TypeSpecifier LocalVariableDeclarators SEMICOLON	{ $$ = FMNodes.MakeLocalVariableDeclarationStatement($1, $2); }
-									|   StructDeclaration									{ $$ = FMNodes.MakeLocalVariableDeclarationStatement($1); }                  						
+LocalVariableDeclarationStatement	:	TypeSpecifier LocalVariableDeclarators SEMICOLON	{ $$ = new LocalVariableDeclarationStatement($1, $2); }
+									|   StructDeclaration									{ $$ = new LocalVariableDeclarationStatement($1); }                  						
 									;
 
-LocalVariableDeclarators	:	LocalVariableDeclaratorName	{ $$ = FMNodes.MakeLocalVariableDeclarators($1); }
-							|   LocalVariableDeclarators COMMA LocalVariableDeclaratorName	{ $$ = FMNodes.MakeLocalVariableDeclarators($1, $3); }
+LocalVariableDeclarators	:	LocalVariableDeclaratorName	{ $$ = new LocalVariableDeclarators($1); }
+							|   LocalVariableDeclarators COMMA LocalVariableDeclaratorName	{ ((LocalVariableDeclarators)$1).AddLocalVariableDeclaratorName($3); $$ = $1; }
 							;
-
-							
+					
 
 Statement					:	EmptyStatement					{ $$ = $1; }
 							|	ExpressionStatement SEMICOLON	{ $$ = $1; }
@@ -170,7 +169,7 @@ Statement					:	EmptyStatement					{ $$ = $1; }
 							|   Block							{ $$ = $1; }
 							;
 							
-EmptyStatement				:	SEMICOLON	{ $$ = FMNodes.MakeEmptyStatement( ); }
+EmptyStatement				:	SEMICOLON	{ $$ = new EmptyStatement( ); }
 							;
 
 ExpressionStatement			:	Expression	{ $$ = $1; }
@@ -182,46 +181,46 @@ ExpressionStatement			:	Expression	{ $$ = $1; }
  *
  */
 
-SelectionStatement			:	IF LPAREN Expression RPAREN Statement ELSE Statement	{ $$ = FMNodes.MakeSelectionStatement($3, $5, $7); }
-							|   IF LPAREN Expression RPAREN Statement	{ $$ = FMNodes.MakeSelectionStatement($3, $5); }
+SelectionStatement			:	IF LPAREN Expression RPAREN Statement ELSE Statement	{ $$ = new SelectionStatement($3, $5, $7); }
+							|   IF LPAREN Expression RPAREN Statement	{ $$ = new SelectionStatement($3, $5); }
 							;
 
 
-IterationStatement			:	WHILE LPAREN Expression RPAREN Statement	{$$ = FMNodes.MakeIterationStatement($3, $5); }
+IterationStatement			:	WHILE LPAREN Expression RPAREN Statement	{$$ = new IterationStatement($3, $5); }
 							;
 
-ReturnStatement				:	RETURN Expression SEMICOLON	{ $$ = FMNodes.MakeReturnStatement($2); }
-							|   RETURN            SEMICOLON	{ $$ = FMNodes.MakeReturnStatement(); }
+ReturnStatement				:	RETURN Expression SEMICOLON	{ $$ = new ReturnStatement($2); }
+							|   RETURN            SEMICOLON	{ $$ = new ReturnStatement(); }
 							;
 
-ArgumentList				:	Expression						{ $$ = FMNodes.MakeArgumentList($1); }
-							|   ArgumentList COMMA Expression	{ $$ = FMNodes.MakeArgumentList($1, $3); }
+ArgumentList				:	Expression						{ $$ = new ArgumentList($1); }
+							|   ArgumentList COMMA Expression	{ ((ArgumentList)$1).AddExpression($3); $$ = $1; }
 							;
 
 
-Expression					:	QualifiedName EQUALS Expression	{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.EQUALS, $3); }
-							|   Expression OP_LOR Expression	{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.OP_LOR, $3); }	/* short-circuit OR */
-							|   Expression OP_LAND Expression	{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.OP_LAND, $3); }	/* short-circuit AND */
-							|   Expression PIPE Expression		{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.PIPE, $3); }
-							|   Expression HAT Expression		{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.HAT, $3); }
-							|   Expression AND Expression		{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.AND, $3); }
-							|	Expression OP_EQ Expression		{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.OP_EQ, $3); }
-							|   Expression OP_NE Expression		{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.OP_NE, $3); }
-							|	Expression OP_GT Expression		{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.OP_GT, $3); }
-							|	Expression OP_LT Expression		{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.OP_LT, $3); }
-							|	Expression OP_LE Expression		{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.OP_LE, $3); }
-							|	Expression OP_GE Expression		{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.OP_GE, $3); }
-							|   Expression PLUSOP Expression	{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.PLUSOP, $3); }
-							|   Expression MINUSOP Expression	{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.MINUSOP, $3); }
-							|	Expression ASTERISK Expression	{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.ASTERISK, $3); }
-							|	Expression RSLASH Expression	{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.RSLASH, $3); }
-							|   Expression PERCENT Expression	{ $$ = FMNodes.MakeExpression($1, FMNodes.ExpressionEnums.PERCENT, $3); }	/* remainder */
-							|	ArithmeticUnaryOperator Expression  %prec UNARY { $$ = FMNodes.MakeExpression($1, $2, yytext, FMNodes.ExpressionEnums.UNARY); }	// TODO: fix me
-							|	PrimaryExpression	{ $$ = $1; }	//{ $$ = FMNodes.MakeExpression($1); } TODO: fix me
+Expression					:	QualifiedName EQUALS Expression	{ $$ = new Expression($1, ExpressionEnums.EQUALS, $3); }
+							|   Expression OP_LOR Expression	{ $$ = new Expression($1, ExpressionEnums.OP_LOR, $3); }	/* short-circuit OR */
+							|   Expression OP_LAND Expression	{ $$ = new Expression($1, ExpressionEnums.OP_LAND, $3); }	/* short-circuit AND */
+							|   Expression PIPE Expression		{ $$ = new Expression($1, ExpressionEnums.PIPE, $3); }
+							|   Expression HAT Expression		{ $$ = new Expression($1, ExpressionEnums.HAT, $3); }
+							|   Expression AND Expression		{ $$ = new Expression($1, ExpressionEnums.AND, $3); }
+							|	Expression OP_EQ Expression		{ $$ = new Expression($1, ExpressionEnums.OP_EQ, $3); }
+							|   Expression OP_NE Expression		{ $$ = new Expression($1, ExpressionEnums.OP_NE, $3); }
+							|	Expression OP_GT Expression		{ $$ = new Expression($1, ExpressionEnums.OP_GT, $3); }
+							|	Expression OP_LT Expression		{ $$ = new Expression($1, ExpressionEnums.OP_LT, $3); }
+							|	Expression OP_LE Expression		{ $$ = new Expression($1, ExpressionEnums.OP_LE, $3); }
+							|	Expression OP_GE Expression		{ $$ = new Expression($1, ExpressionEnums.OP_GE, $3); }
+							|   Expression PLUSOP Expression	{ $$ = new Expression($1, ExpressionEnums.PLUSOP, $3); }
+							|   Expression MINUSOP Expression	{ $$ = new Expression($1, ExpressionEnums.MINUSOP, $3); }
+							|	Expression ASTERISK Expression	{ $$ = new Expression($1, ExpressionEnums.ASTERISK, $3); }
+							|	Expression RSLASH Expression	{ $$ = new Expression($1, ExpressionEnums.RSLASH, $3); }
+							|   Expression PERCENT Expression	{ $$ = new Expression($1, ExpressionEnums.PERCENT, $3); }	/* remainder */
+							|	ArithmeticUnaryOperator Expression  %prec UNARY { $$ = new Expression($1, $2, yytext, ExpressionEnums.UNARY); }	// TODO: fix me
+							|	PrimaryExpression	{ $$ = $1; }	// TODO: fix me
 							;
 
-ArithmeticUnaryOperator		:	PLUSOP	{ $$ = FMNodes.GetArithmeticUnaryOperator(FMNodes.ExpressionEnums.PLUSOP); }
-							|   MINUSOP	{ $$ = FMNodes.GetArithmeticUnaryOperator(FMNodes.ExpressionEnums.PLUSOP); }
+ArithmeticUnaryOperator		:	PLUSOP	{ $$ = new ArithmeticUnaryOperator(ExpressionEnums.PLUSOP); }
+							|   MINUSOP	{ $$ = new ArithmeticUnaryOperator(ExpressionEnums.PLUSOP); }
 							;
 							
 PrimaryExpression			:	QualifiedName	{ $$ = $1; }
@@ -236,17 +235,17 @@ ComplexPrimary				:	LPAREN Expression RPAREN	{ $$ = $2; }
 							|   ComplexPrimaryNoParenthesis	{ $$ = $1; }
 							;
 
-ComplexPrimaryNoParenthesis	:	LITERAL		{ $$ = FMNodes.GetLiteral(yystringval); }
+ComplexPrimaryNoParenthesis	:	LITERAL		{ $$ = new Literal(yystringval); }
 							|   Number		{ $$ = $1; }
 							|	FieldAccess	{ $$ = $1; }
 							|	MethodCall	{ $$ = $1; }
 							;
 
-FieldAccess					:	NotJustName PERIOD Identifier	{ $$ = FMNodes.MakeFieldAccess($1, $3); }
+FieldAccess					:	NotJustName PERIOD Identifier	{ $$ = new FieldAccess($1, $3); }
 							;		
 
-MethodCall					:	MethodReference LPAREN ArgumentList RPAREN	{ $$ = FMNodes.MakeMethodCall($1, $3); }
-							|   MethodReference LPAREN RPAREN				{ $$ = FMNodes.MakeMethodCall($1); }
+MethodCall					:	MethodReference LPAREN ArgumentList RPAREN	{ $$ = new MethodCall($1, $3); }
+							|   MethodReference LPAREN RPAREN				{ $$ = new MethodCall($1); }
 							;
 
 MethodReference				:	ComplexPrimaryNoParenthesis	{ $$ = $1; }	
@@ -254,14 +253,14 @@ MethodReference				:	ComplexPrimaryNoParenthesis	{ $$ = $1; }
 							|   SpecialName					{ $$ = $1; }
 							;
 
-SpecialName					:	THIS	{ $$ = FMNodes.GetSpecialName(FMNodes.SpecialNameEnums.THIS); }
-							|	NULL	{ $$ = FMNodes.GetSpecialName(FMNodes.SpecialNameEnums.NULL); }
+SpecialName					:	THIS	{ $$ = new SpecialName(SpecialNameEnums.THIS); }
+							|	NULL	{ $$ = new SpecialName(SpecialNameEnums.NULL); }
 							;
 
-Identifier					:	IDENTIFIER	{  $$ = FMNodes.GetIdentifier(yytext); }
+Identifier					:	IDENTIFIER	{  $$ = new Identifier(yytext); }
 							;
 
-Number						:	INT_NUMBER	{ $$ = FMNodes.GetNumber(yytext); }
+Number						:	INT_NUMBER	{ $$ = new Number(yytext); }
 							;
 
 %%

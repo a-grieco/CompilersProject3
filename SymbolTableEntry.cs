@@ -18,7 +18,7 @@ namespace Project3
         StructDeclType,
         FieldVarDeclType,
         ArrayType,
-        PrimitiveType,
+        PrimitiveTypeBoolean, PrimitiveTypeInt, PrimitiveTypeVoid,
         FieldVarDeclaratorsType,
         MethodDeclType,
         ParameterListType // TODO: fix these
@@ -28,7 +28,7 @@ namespace Project3
     {
         public abstract AttributeType AttributeType { get; set; }
         public abstract EntryType EntryType { get; }
-        public abstract Description Desc { get; set; }
+        //public abstract Description Desc { get; set; }
         public abstract int Size { get; }
 
         //public SymbolTableEntry(AttributeType attr)
@@ -41,7 +41,7 @@ namespace Project3
     {
         public override AttributeType AttributeType { get; set; }
         public override EntryType EntryType { get; }
-        public override Description Desc { get; set; }
+        //public override Description Desc { get; set; }
         public override int Size { get; }
     }
 }

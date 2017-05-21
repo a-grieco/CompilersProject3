@@ -56,7 +56,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractSymbolTable.cs" />
-    <Compile Include="FMNodes.cs" />
     <Compile Include="GplexBuffers.cs" />
     <Compile Include="IDescription.cs" />
     <Compile Include="ISymbolTable.cs" />

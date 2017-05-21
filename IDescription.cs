@@ -9,19 +9,19 @@ namespace Project3
 {
     public interface IDescription
     {
-
-        //int Size { get; }
+        EntryType EntryType { get; set; }
+        DescriptionEntry DescriptionEntry { get; set; }
     }
 
-    public abstract class Description : IDescription
+    public abstract class DescriptionEntry
     {
-        public virtual int Size { get; }
+        //public virtual int Size { get; }
     }
 
-    public class ClassDescription : Description, IDescription
+    public class ClassTypeDescriptor : DescriptionEntry
     {
-        public Modifiers Modifiers { get; set; }
-        public Identifier Identifier { get; set; }
-        public ClassBody ClassBody { get; set; }
+        //public Modifiers Modifiers { get; set; }
+        //public Identifier Identifier { get; set; }
+        //public ClassBody ClassBody { get; set; }
     }
 }

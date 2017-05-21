@@ -63,13 +63,39 @@ namespace Project3
             Console.ResetColor();
 
         }
-        public void VisitNode(PrimitiveType node)
+
+        //public void VisitNode(PrimitiveType node)
+        //{
+        //    Console.Write("<" + node.ClassName() + ">: ");
+        //    Console.ForegroundColor = ConsoleColor.Green;
+        //    Console.WriteLine(node.Type);
+        //    Console.ResetColor();
+        //}
+
+        public void VisitNode(PrimitiveTypeInt node)
         {
             Console.Write("<" + node.ClassName() + ">: ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(node.Type);
+            Console.WriteLine("INT");
             Console.ResetColor();
         }
+
+        public void VisitNode(PrimitiveTypeBoolean node)
+        {
+            Console.Write("<" + node.ClassName() + ">: ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("BOOLEAN");
+            Console.ResetColor();
+        }
+
+        public void VisitNode(PrimitiveTypeVoid node)
+        {
+            Console.Write("<" + node.ClassName() + ">: ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("VOID");
+            Console.ResetColor();
+        }
+
         public void VisitNode(Expression node)
         {
             Console.Write("<" + node.ClassName() + ">: ");

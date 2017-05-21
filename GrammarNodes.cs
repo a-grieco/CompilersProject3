@@ -9,7 +9,6 @@ using Project3;
 
 namespace Project3
 {
-    // Substitute your GrammarNode.cs file for this one
     public class CompilationUnit : AbstractNode
     {
         // just for the compilation unit because it's the top node
@@ -23,7 +22,7 @@ namespace Project3
 
     }
 
-    public class ClassDeclaration : AbstractNode
+    public class ClassDeclaration : AbstractNode, IDescription
     {
         public ClassDeclaration(AbstractNode modifiers, AbstractNode identifier,
             AbstractNode classBody)
@@ -32,23 +31,32 @@ namespace Project3
             adoptChildren(identifier);  // TODO: AbstractNode Identifiers
             adoptChildren(classBody);
         }
+
+        public EntryType EntryType
+        {
+            get { return EntryType.ClassType; }
+            set { throw new NotImplementedException(); }
+        }
+
+        public DescriptionEntry DescriptionEntry { get; set; }
     }
 
+    public enum ModifiersEnums { PUBLIC, PRIVATE, STATIC }
     public class Modifiers : AbstractNode
     {
-        public List<FMNodes.ModifiersEnums> ModifierTokens { get; set; }
+        public List<ModifiersEnums> ModifierTokens { get; set; }
 
-        public Modifiers(FMNodes.ModifiersEnums modToken)
+        public Modifiers(ModifiersEnums modToken)
         {
-            ModifierTokens = new List<FMNodes.ModifiersEnums>();
+            ModifierTokens = new List<ModifiersEnums>();
             AddModifier(modToken);
         }
 
-        public void AddModifier(FMNodes.ModifiersEnums modToken)
+        public void AddModifier(ModifiersEnums modToken)
         {
             ModifierTokens.Add(modToken);
-            if (ModifierTokens.Contains(FMNodes.ModifiersEnums.PUBLIC) &&
-                ModifierTokens.Contains(FMNodes.ModifiersEnums.PRIVATE))
+            if (ModifierTokens.Contains(ModifiersEnums.PUBLIC) &&
+                ModifierTokens.Contains(ModifiersEnums.PRIVATE))
             {
                 throw new ArgumentException("Illegal modifiers: must be PUBLIC " +
                                             "or PRIVATE, cannot be both");
@@ -58,12 +66,11 @@ namespace Project3
 
     public class ClassBody : AbstractNode
     {
+        public ClassBody() { }
+
         public ClassBody(AbstractNode fieldDeclarations)
         {
-            if (fieldDeclarations != null)
-            {
-                adoptChildren(fieldDeclarations);
-            }
+            adoptChildren(fieldDeclarations);
         }
     }
 
@@ -110,27 +117,48 @@ namespace Project3
         }
     }
 
-    public class PrimitiveType : AbstractNode
-    {
-        public FMNodes.PrimitiveEnums Type { get; set; }
+    //public class PrimitiveType : AbstractNode, IDescription
+    //{
+    //    public FMNodes.PrimitiveEnums Type { get; set; }
 
-        public PrimitiveType(FMNodes.PrimitiveEnums primType)
+    //    public PrimitiveType(FMNodes.PrimitiveEnums primType)
+    //    {
+    //        Type = primType;
+    //    }
+
+    //    public EntryType EntryType { get; set; }
+    //    public DescriptionEntry DescriptionEntry { get; set; }
+    //}
+
+    public class PrimitiveTypeVoid : AbstractNode, IDescription
+    {
+        public EntryType EntryType
         {
-            Type = primType;
+            get { return EntryType.PrimitiveTypeVoid; }
+            set { throw new NotImplementedException(); }
         }
+
+        public DescriptionEntry DescriptionEntry { get; set; }
     }
 
-    public class PrimitiveTypeVoid : AbstractNode
+    public class PrimitiveTypeInt : AbstractNode, IDescription
     {
-
-    }
-
-    public class PrimitiveTypeInt : AbstractNode
-    {
+        public EntryType EntryType
+        {
+            get { return EntryType.PrimitiveTypeInt; }
+            set { throw new NotImplementedException(); }
+        }
+        public DescriptionEntry DescriptionEntry { get; set; }
     }
 
     public class PrimitiveTypeBoolean : AbstractNode
     {
+        public EntryType EntryType
+        {
+            get { return EntryType.PrimitiveTypeBoolean; }
+            set { throw new NotImplementedException(); }
+        }
+        public DescriptionEntry DescriptionEntry { get; set; }
     }
 
     public class FieldVariableDeclarators : AbstractNode
@@ -159,13 +187,15 @@ namespace Project3
 
     public class MethodDeclarator : AbstractNode
     {
+        public MethodDeclarator(AbstractNode methodDeclaratorName)
+        {
+            adoptChildren(methodDeclaratorName);
+        }
+
         public MethodDeclarator(AbstractNode methodDeclaratorName, AbstractNode parameterList)
         {
             adoptChildren(methodDeclaratorName);
-            if (parameterList != null)
-            {
-                adoptChildren(parameterList);
-            }
+            adoptChildren(parameterList);
         }
     }
 
@@ -203,10 +233,10 @@ namespace Project3
             adoptChildren(identifier);
         }
     }
-    
+
     public class ConstructorDeclaration : AbstractNode
     {
-        public ConstructorDeclaration(AbstractNode modifiers, 
+        public ConstructorDeclaration(AbstractNode modifiers,
             AbstractNode methodDeclarator, AbstractNode block)
         {
             adoptChildren(modifiers);
@@ -225,34 +255,31 @@ namespace Project3
 
     public class Block : AbstractNode
     {
-        public Block(AbstractNode localVarDeclOrStmnt)
+        public Block() { }
+
+        public Block(AbstractNode localVarDeclOrStmt)
         {
-            if (localVarDeclOrStmnt != null)
-            {
-                adoptChildren(localVarDeclOrStmnt);
-            }
+            adoptChildren(localVarDeclOrStmt);
         }
 
-        public void AddLocalVarDeclStmt(AbstractNode localVarDeclOrStmnt)
+        public void AddLocalVarDeclStmt(AbstractNode localVarDeclOrStmt)
         {
-            adoptChildren(localVarDeclOrStmnt);
+            adoptChildren(localVarDeclOrStmt);
         }
     }
 
     public class LocalVariableDeclarationStatement : AbstractNode
     {
+
         public LocalVariableDeclarationStatement(AbstractNode typeSpecifier,
-            AbstractNode localVariableDeclarators, AbstractNode structDeclaration)
+            AbstractNode localVariableDeclarators)
         {
-            if (structDeclaration == null)
-            {
-                adoptChildren(typeSpecifier);
-                adoptChildren(localVariableDeclarators);
-            }
-            else
-            {
-                adoptChildren(structDeclaration);
-            }
+            adoptChildren(typeSpecifier);
+            adoptChildren(localVariableDeclarators);
+        }
+        public LocalVariableDeclarationStatement(AbstractNode structDeclaration)
+        {
+            adoptChildren(structDeclaration);
         }
     }
 
@@ -279,14 +306,19 @@ namespace Project3
 
     public class SelectionStatement : AbstractNode
     {
-        public SelectionStatement(AbstractNode ifExpression)
+        public SelectionStatement(AbstractNode ifExpression, 
+            AbstractNode thenStatement, AbstractNode elseStatement)
         {
             adoptChildren(ifExpression);
+            adoptChildren(new ThenStatement(thenStatement));
+            adoptChildren(new ElseStatement(elseStatement));
         }
 
-        public void AddStatement(AbstractNode thenStatement)
+        public SelectionStatement(AbstractNode ifExpression, 
+            AbstractNode thenStatement)
         {
-            adoptChildren(thenStatement);
+            adoptChildren(ifExpression);
+            adoptChildren(new ThenStatement(thenStatement));
         }
     }
 
@@ -308,7 +340,7 @@ namespace Project3
 
     public class IterationStatement : AbstractNode
     {
-        public IterationStatement(AbstractNode expression, 
+        public IterationStatement(AbstractNode expression,
             AbstractNode statement)
         {
             adoptChildren(expression);
@@ -339,10 +371,15 @@ namespace Project3
         }
     }
 
+    public enum ExpressionEnums
+    {
+        EQUALS, OP_LOR, OP_LAND, PIPE, HAT, AND, OP_EQ, OP_NE, OP_GT, OP_LT,
+        OP_LE, OP_GE, PLUSOP, MINUSOP, ASTERISK, RSLASH, PERCENT, UNARY
+    }
     public class Expression : AbstractNode
     {
-        public FMNodes.ExpressionEnums ExpressionType { get; set; }
-        public FMNodes.ExpressionEnums ArithmeticUnaryOperator { get; set; }
+        public ExpressionEnums ExpressionType { get; }
+        public ExpressionEnums ArithmeticUnaryOperator { get; set; }
         private int _precision;
 
         public Expression(AbstractNode primaryExpression)
@@ -350,7 +387,7 @@ namespace Project3
             adoptChildren(primaryExpression);
         }
 
-        public Expression(AbstractNode lhs, FMNodes.ExpressionEnums op,
+        public Expression(AbstractNode lhs, ExpressionEnums op,
             AbstractNode rhs)
         {
             ExpressionType = op;
@@ -359,7 +396,7 @@ namespace Project3
         }
 
         public Expression(AbstractNode arithmeticUnaryOperator, AbstractNode expression,
-            string prec, FMNodes.ExpressionEnums op)
+            string prec, ExpressionEnums op)
         {
             ExpressionType = op;
             _precision = Int32.Parse(prec);
@@ -370,14 +407,14 @@ namespace Project3
 
     public class ArithmeticUnaryOperator : AbstractNode
     {
-        private FMNodes.ExpressionEnums op;
+        private ExpressionEnums op;
 
-        public FMNodes.ExpressionEnums GetOp
+        public ExpressionEnums GetOp
         {
             get { return op; }
         }
 
-        public ArithmeticUnaryOperator(FMNodes.ExpressionEnums op)
+        public ArithmeticUnaryOperator(ExpressionEnums op)
         {
             this.op = op;
         }
@@ -416,11 +453,12 @@ namespace Project3
         }
     }
 
+    public enum SpecialNameEnums { THIS, NULL }
     public class SpecialName : AbstractNode
     {
-        public FMNodes.SpecialNameEnums Name { get; set; }
+        public SpecialNameEnums Name { get; set; }
 
-        public SpecialName(FMNodes.SpecialNameEnums specialName)
+        public SpecialName(SpecialNameEnums specialName)
         {
             Name = specialName;
         }
@@ -428,7 +466,7 @@ namespace Project3
 
     public class Identifier : AbstractNode
     {
-        public string ID { get; set; }  // TODO: Type/Object Attributes?
+        public string ID { get; }  // TODO: Type/Object Attributes?
 
         public Identifier(string id)
         {
@@ -438,7 +476,7 @@ namespace Project3
 
     public class Number : AbstractNode
     {
-        public int Num { get; set; }
+        public int Num { get; }
 
         public Number(string intNumber)
         {

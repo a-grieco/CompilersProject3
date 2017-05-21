@@ -65,7 +65,7 @@ namespace Project3
             }
 
             Console.WriteLine("\nProgram complete. Press any key to close.");
-            Console.ReadKey();
+            //Console.ReadKey();
         }
     }
 }

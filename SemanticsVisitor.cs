@@ -72,7 +72,7 @@ namespace Project3
         // ClassDeclaring
         private void VisitNode(ClassDeclaration node)
         {
-            ClassDescription desc = new ClassDescription();
+            ClassTypeDescriptor desc = new ClassTypeDescriptor();
             AbstractNode modNode = node.Child;
             AbstractNode idNode = modNode.Sib;
             AbstractNode bodyNode = idNode.Sib;
@@ -85,7 +85,7 @@ namespace Project3
 
 
 
-            desc.Modifiers = (Modifiers) node.Child;
+            //desc.Modifiers = (Modifiers) node.Child;
 
         }
 
