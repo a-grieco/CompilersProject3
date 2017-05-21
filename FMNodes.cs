@@ -79,17 +79,17 @@ namespace Project3
         }
 
 
-        private AbstractNode MakePrimitiveTypeBoolean()
+        public static AbstractNode MakePrimitiveTypeBoolean()
         {
             return new PrimitiveTypeBoolean();
         }
 
-        private AbstractNode MakePrimitiveTypeInt()
+        public static AbstractNode MakePrimitiveTypeInt()
         {
             return new PrimitiveTypeInt();
         }
 
-        private AbstractNode MakePrimitiveTypeVoid()
+        public static AbstractNode MakePrimitiveTypeVoid()
         {
             return new PrimitiveTypeVoid();
         }
