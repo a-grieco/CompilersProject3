@@ -67,6 +67,7 @@
     <Compile Include="IVisitableNode.cs" />
     <Compile Include="PrintVisitor.cs" />
     <Compile Include="SemanticsVisitor.cs" />
+    <Compile Include="TypeDescriptor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -75,7 +76,7 @@
     </None>
   </ItemGroup>
   <ItemGroup Label="TCCLFiles">
-    <Compile Include="SymbolTableEntry.cs" />
+    <Compile Include="Attributes.cs" />
     <Compile Include="SymbolTable.cs" />
     <Compile Include="TCCL.Parser.cs">
       <DependentUpon>TCCL.parser</DependentUpon>

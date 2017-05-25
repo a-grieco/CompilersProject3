@@ -19,10 +19,9 @@ namespace Project3
         {
             adoptChildren(classDecl);
         }
-
     }
 
-    public class ClassDeclaration : AbstractNode, IDescription
+    public class ClassDeclaration : AbstractNode
     {
         public ClassDeclaration(AbstractNode modifiers, AbstractNode identifier,
             AbstractNode classBody)
@@ -31,20 +30,12 @@ namespace Project3
             adoptChildren(identifier);  // TODO: AbstractNode Identifiers
             adoptChildren(classBody);
         }
-
-        public EntryType EntryType
-        {
-            get { return EntryType.ClassType; }
-            set { throw new NotImplementedException(); }
-        }
-
-        public DescriptionEntry DescriptionEntry { get; set; }
     }
 
     public enum ModifiersEnums { PUBLIC, PRIVATE, STATIC }
     public class Modifiers : AbstractNode
     {
-        public List<ModifiersEnums> ModifierTokens { get; set; }
+        public List<ModifiersEnums> ModifierTokens { get; }
 
         public Modifiers(ModifiersEnums modToken)
         {
@@ -130,35 +121,16 @@ namespace Project3
     //    public DescriptionEntry DescriptionEntry { get; set; }
     //}
 
-    public class PrimitiveTypeVoid : AbstractNode, IDescription
+    public class PrimitiveTypeVoid : AbstractNode
     {
-        public EntryType EntryType
-        {
-            get { return EntryType.PrimitiveTypeVoid; }
-            set { throw new NotImplementedException(); }
-        }
-
-        public DescriptionEntry DescriptionEntry { get; set; }
     }
 
-    public class PrimitiveTypeInt : AbstractNode, IDescription
+    public class PrimitiveTypeInt : AbstractNode
     {
-        public EntryType EntryType
-        {
-            get { return EntryType.PrimitiveTypeInt; }
-            set { throw new NotImplementedException(); }
-        }
-        public DescriptionEntry DescriptionEntry { get; set; }
     }
 
     public class PrimitiveTypeBoolean : AbstractNode
     {
-        public EntryType EntryType
-        {
-            get { return EntryType.PrimitiveTypeBoolean; }
-            set { throw new NotImplementedException(); }
-        }
-        public DescriptionEntry DescriptionEntry { get; set; }
     }
 
     public class FieldVariableDeclarators : AbstractNode
@@ -270,7 +242,6 @@ namespace Project3
 
     public class LocalVariableDeclarationStatement : AbstractNode
     {
-
         public LocalVariableDeclarationStatement(AbstractNode typeSpecifier,
             AbstractNode localVariableDeclarators)
         {

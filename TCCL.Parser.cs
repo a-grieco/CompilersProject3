@@ -8,6 +8,7 @@ namespace ASTBuilder
 {
     public partial class TCCLParser
     {
+
         public TCCLParser() : base(null) { }
 
         SymbolTable st = new SymbolTable();
@@ -16,17 +17,17 @@ namespace ASTBuilder
         {
             this.Scanner = new TCCLScanner(File.OpenRead(filename));
             this.Parse();
-            //   PrintTree();
-            DoSemantics();
             PrintTree();
+            DoSemantics();
+            //PrintTree();
         }
         public void Parse(Stream strm)
         {
             this.Scanner = new TCCLScanner(strm);
             this.Parse();
-            //   PrintTree();
-            DoSemantics();
             PrintTree();
+            DoSemantics();
+            //PrintTree();
         }
         public void PrintTree()
         {

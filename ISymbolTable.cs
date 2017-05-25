@@ -12,13 +12,13 @@ namespace Project3
         void openScope();
 
         // Close an existing nested symbol table
-        void closeScope();
+        Dictionary<string, Attributes> closeScope();
 
         int CurrentNestLevel { get; }
 
-        SymbolTableEntry lookup(string id);
+        Attributes lookup(string id);
 
-        void enter(string id, SymbolTableEntry s);
+        void enter(string id, Attributes s);
 
         /// This lets you put out a message about a node, indented by the current nest level 
         //    void @out(AbstractNode n, string message);
