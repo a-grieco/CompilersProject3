@@ -6,11 +6,10 @@ namespace Project3
 {
     [DebuggerDisplay("AbstractNodeType: {ToString()}")]
 
-    /// <summary>
-    /// All AST nodes are subclasses of this node.  This node knows how to
-    /// link itself with other siblings and adopt children.
-    /// Each node gets a node number to help identify it distinctly in an AST.
-    /// </summary>
+    /* All AST nodes are subclasses of this node.  This node knows how to
+     * link itself with other siblings and adopt children. Each node gets 
+     * a node number to help identify it distinctly in an AST.  */
+
     public abstract class AbstractNode : IVisitableNode
     {
         private static int nodeNums = 0;
@@ -21,7 +20,7 @@ namespace Project3
         private AbstractNode firstSib;
         private Type type;
 
-        public TypeDescriptor TypeDescriptor { get; set; }
+        public TypeDescriptor TypeDescriptor { get; set; }  //TODO, delete
         public Attributes AttributesRef { get; set; }
 
         public AbstractNode()
@@ -238,6 +237,6 @@ namespace Project3
         */
 
 
-    }
+}
 
 }

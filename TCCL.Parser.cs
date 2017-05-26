@@ -19,7 +19,7 @@ namespace ASTBuilder
             this.Parse();
             PrintTree();
             DoSemantics();
-            //PrintTree();
+            PrintTree();
         }
         public void Parse(Stream strm)
         {
@@ -27,7 +27,7 @@ namespace ASTBuilder
             this.Parse();
             PrintTree();
             DoSemantics();
-            //PrintTree();
+            PrintTree();
         }
         public void PrintTree()
         {
@@ -38,9 +38,15 @@ namespace ASTBuilder
 
         public void DoSemantics()
         {
-            SemanticsVisitor visitor = new SemanticsVisitor();
+            SymbolTable symbolTable = new SymbolTable();
+
+            TopDeclVisitor topDeclVisitor = new TopDeclVisitor(symbolTable);
+            Console.WriteLine("Starting declarations processing");
+            topDeclVisitor.CheckSemantics(CurrentSemanticValue);
+
+            SemanticsVisitor semanticsVisitor = new SemanticsVisitor(symbolTable);
             Console.WriteLine("Starting semantic checking");
-            visitor.CheckSemantics(CurrentSemanticValue);
+            semanticsVisitor.CheckSemantics(CurrentSemanticValue);
 
         }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using ASTBuilder;
@@ -123,14 +124,20 @@ namespace Project3
 
     public class PrimitiveTypeVoid : AbstractNode
     {
+        private string _stringName = "VOID";
+        public string StringName { get { return _stringName; } }
     }
 
     public class PrimitiveTypeInt : AbstractNode
     {
+        private string _stringName = "INT";
+        public string StringName { get { return _stringName; } }
     }
 
     public class PrimitiveTypeBoolean : AbstractNode
     {
+        private string _stringName = "BOOLEAN";
+        public string StringName { get { return _stringName; } }
     }
 
     public class FieldVariableDeclarators : AbstractNode
@@ -171,16 +178,45 @@ namespace Project3
         }
     }
 
+    public class Signature
+    {
+        public TypeDescriptor ReturnType;
+        public List<string> ParameterTypes;
+
+        public Signature()
+        {
+            ParameterTypes = new List<string>();
+        }
+
+        public Signature(TypeDescriptor attrReturnType)
+        {
+            ReturnType = attrReturnType;
+            ParameterTypes = new List<string>();
+        }
+    }
+
     public class ParameterList : AbstractNode
     {
+        public Signature ParamSignature = new Signature();
+
         public ParameterList(AbstractNode parameter)
         {
             adoptChildren(parameter);
+            ParamSignature.ParameterTypes.Add(
+                ((Parameter)parameter).GetParamType());
         }
 
         public void AddParameter(AbstractNode parameter)
         {
             adoptChildren(parameter);
+            ParamSignature.ParameterTypes.Add(
+                ((Parameter)parameter).GetParamType());
+        }
+
+        public Signature AddReturnToSignature(TypeDescriptor attrReturnType)
+        {
+            ParamSignature.ReturnType = attrReturnType;
+            return ParamSignature;
         }
     }
 
@@ -191,18 +227,52 @@ namespace Project3
             adoptChildren(typeSpecifier);
             adoptChildren(declaratorName);
         }
+
+        public string GetParamType()
+        {
+            AbstractNode typeSpecifier = this.Child;
+            if (typeSpecifier is PrimitiveTypeVoid)
+            {
+                return "VOID";
+            }
+            else if (typeSpecifier is PrimitiveTypeBoolean)
+            {
+                return "BOOLEAN";
+            }
+            else if (typeSpecifier is PrimitiveTypeInt)
+            {
+                return "INT";
+            }
+            else if (typeSpecifier is QualifiedName)
+            {
+                return ((QualifiedName)typeSpecifier).GetStringName();
+            }
+            else
+            {
+                return "ERROR";
+            }
+        }
     }
 
     public class QualifiedName : AbstractNode
     {
+        private string _stringName;
+
         public QualifiedName(AbstractNode identifier)
         {
             adoptChildren(identifier);
+            _stringName = ((Identifier)identifier).ID;
         }
 
         public void AddIdentifier(AbstractNode identifier)
         {
             adoptChildren(identifier);
+            _stringName += "." + ((Identifier)identifier).ID;
+        }
+
+        public string GetStringName()
+        {
+            return _stringName;
         }
     }
 
@@ -277,7 +347,7 @@ namespace Project3
 
     public class SelectionStatement : AbstractNode
     {
-        public SelectionStatement(AbstractNode ifExpression, 
+        public SelectionStatement(AbstractNode ifExpression,
             AbstractNode thenStatement, AbstractNode elseStatement)
         {
             adoptChildren(ifExpression);
@@ -285,7 +355,7 @@ namespace Project3
             adoptChildren(new ElseStatement(elseStatement));
         }
 
-        public SelectionStatement(AbstractNode ifExpression, 
+        public SelectionStatement(AbstractNode ifExpression,
             AbstractNode thenStatement)
         {
             adoptChildren(ifExpression);
@@ -345,7 +415,7 @@ namespace Project3
     public enum ExpressionEnums
     {
         EQUALS, OP_LOR, OP_LAND, PIPE, HAT, AND, OP_EQ, OP_NE, OP_GT, OP_LT,
-        OP_LE, OP_GE, PLUSOP, MINUSOP, ASTERISK, RSLASH, PERCENT, UNARY
+        OP_LE, OP_GE, PLUSOP, MINUSOP, ASTERISK, RSLASH, PERCENT, UNARY, PRIMARY
     }
     public class Expression : AbstractNode
     {
@@ -355,6 +425,7 @@ namespace Project3
 
         public Expression(AbstractNode primaryExpression)
         {
+            ExpressionType = ExpressionEnums.PRIMARY;
             adoptChildren(primaryExpression);
         }
 

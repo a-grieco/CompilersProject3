@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -40,28 +41,50 @@ namespace Project3
             };
         }
 
+        private void PrintAttribute(AbstractNode node)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            //Console.Write("  *" + node.AttributesRef);
+            //Console.ForegroundColor = ConsoleColor.DarkGray;
+            //Console.WriteLine("  *" + node.TypeDescriptor);
+            if (node.AttributesRef != null)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("  " + node.AttributesRef);
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\t" + node.TypeDescriptor);
+            }
+            Console.ResetColor();
+        }
+
         public void VisitNode(AbstractNode node)
         {
-            Console.WriteLine("<" + node.ClassName() + ">");
+            //Console.WriteLine("<" + node.ClassName() + ">");
+            Console.Write("<" + node.ClassName() + ">");
+            Console.ResetColor();
+            PrintAttribute(node);
         }
 
         public void VisitNode(Modifiers node)
         {
             Console.Write("<" + node.ClassName() + ">: ");
-            // Add code here to print Modifier info
             var stringEnums = node.ModifierTokens.Select(x => x.ToString());
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(string.Join(", ", stringEnums));
+            Console.Write(string.Join(", ", stringEnums));
             Console.ResetColor();
+            PrintAttribute(node);
         }
 
         public void VisitNode(Identifier node)
         {
             Console.Write("<" + node.ClassName() + ">: ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(node.ID);
+            Console.Write(node.ID);
             Console.ResetColor();
-
+            PrintAttribute(node);
         }
 
         //public void VisitNode(PrimitiveType node)
@@ -76,56 +99,63 @@ namespace Project3
         {
             Console.Write("<" + node.ClassName() + ">: ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("INT");
+            Console.Write("INT");
             Console.ResetColor();
+            PrintAttribute(node);
         }
 
         public void VisitNode(PrimitiveTypeBoolean node)
         {
             Console.Write("<" + node.ClassName() + ">: ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("BOOLEAN");
+            Console.Write("BOOLEAN");
             Console.ResetColor();
+            PrintAttribute(node);
         }
 
         public void VisitNode(PrimitiveTypeVoid node)
         {
             Console.Write("<" + node.ClassName() + ">: ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("VOID");
+            Console.Write("VOID");
             Console.ResetColor();
+            PrintAttribute(node);
         }
 
         public void VisitNode(Expression node)
         {
             Console.Write("<" + node.ClassName() + ">: ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(node.ExpressionType);
+            Console.Write(node.ExpressionType);
             Console.ResetColor();
+            PrintAttribute(node);
         }
 
         public void VisitNode(SpecialName node)
         {
             Console.Write("<" + node.ClassName() + ">: ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(node.Name);
+            Console.Write(node.Name);
             Console.ResetColor();
+            PrintAttribute(node);
         }
 
         public void VisitNode(Literal node)
         {
             Console.Write("<" + node.ClassName() + ">: ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(node.Lit);
+            Console.Write(node.Lit);
             Console.ResetColor();
+            PrintAttribute(node);
         }
 
         public void VisitNode(Number node)
         {
             Console.Write("<" + node.ClassName() + ">: ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(node.Num);
+            Console.Write(node.Num);
             Console.ResetColor();
+            PrintAttribute(node);
         }
     }
 }

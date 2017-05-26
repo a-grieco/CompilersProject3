@@ -19,10 +19,7 @@ namespace Project3
         public void openScope()
         {
             nestLevel++;
-            while (symbolTable.Count <= nestLevel)
-            {
-                symbolTable.Push(new ScopeTable());
-            }
+            symbolTable.Push(new ScopeTable());
             setBaseline();
         }
 
@@ -37,13 +34,39 @@ namespace Project3
         {
             ScopeTable currScopeTable = symbolTable.Pop();
             // Until given additional info, Java objects are placeholders
-            GeneralAttributes javaAttr = 
+            GeneralAttributes javaAttr =
                 new GeneralAttributes(new JavaObjectDescriptor());
             javaAttr.Kind = Kind.TypeAttributes;
-            currScopeTable.Add("java", javaAttr); 
+            currScopeTable.Add("java", javaAttr);
             currScopeTable.Add("io", javaAttr);
+            currScopeTable.Add("lang", javaAttr);
+            currScopeTable.Add("System", javaAttr);
+            currScopeTable.Add("out", javaAttr);
+            currScopeTable.Add("print", javaAttr);
+            currScopeTable.Add("outint", javaAttr);
             currScopeTable.Add("PrintStream", javaAttr);
             currScopeTable.Add("TestClasses", javaAttr);
+            currScopeTable.Add("WriteLine", javaAttr);
+
+            // primitive types
+            PrimitiveAttributes primVoidAttrs =
+                new PrimitiveAttributes(PrimitiveTypes.VOID);
+            currScopeTable.Add(primVoidAttrs.Name(), primVoidAttrs);
+            PrimitiveAttributes primIntAttrs =
+                new PrimitiveAttributes(PrimitiveTypes.INT);
+            currScopeTable.Add(primIntAttrs.Name(), primIntAttrs);
+            PrimitiveAttributes primBooleanAttrs =
+                new PrimitiveAttributes(PrimitiveTypes.BOOLEAN);
+            currScopeTable.Add(primBooleanAttrs.Name(), primBooleanAttrs);
+
+            // special names
+            SpecialNameAttributes spNameThis = new SpecialNameAttributes
+                (SpecialNameEnums.THIS);
+            currScopeTable.Add(spNameThis.Name, spNameThis);
+            SpecialNameAttributes spNameNull = new SpecialNameAttributes(
+                SpecialNameEnums.NULL);
+            currScopeTable.Add(spNameNull.Name, spNameNull);
+
 
             // TODO: add additional baseline information
 
@@ -96,7 +119,7 @@ namespace Project3
 
     public class ScopeTable
     {
-        readonly Dictionary<string, Attributes> _thisScope = 
+        readonly Dictionary<string, Attributes> _thisScope =
             new Dictionary<string, Attributes>();
 
         // adds a key/value pair to the symbol table at this scope
@@ -129,7 +152,7 @@ namespace Project3
         // returns a copy of the ScopeTable as a dictionary
         public Dictionary<string, Attributes> GetCopy()
         {
-            return _thisScope.ToDictionary(entry => entry.Key, 
+            return _thisScope.ToDictionary(entry => entry.Key,
                 entry => entry.Value);
         }
     }

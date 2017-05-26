@@ -216,7 +216,7 @@ Expression					:	QualifiedName EQUALS Expression	{ $$ = new Expression($1, Expre
 							|	Expression RSLASH Expression	{ $$ = new Expression($1, ExpressionEnums.RSLASH, $3); }
 							|   Expression PERCENT Expression	{ $$ = new Expression($1, ExpressionEnums.PERCENT, $3); }	/* remainder */
 							|	ArithmeticUnaryOperator Expression  %prec UNARY { $$ = new Expression($1, $2, yytext, ExpressionEnums.UNARY); }	// TODO: fix me
-							|	PrimaryExpression	{ $$ = $1; }	// TODO: fix me
+							|	PrimaryExpression	{ $$ = $1; }	//{ $$ = new Expression($1); }	// TODO: fix me
 							;
 
 ArithmeticUnaryOperator		:	PLUSOP	{ $$ = new ArithmeticUnaryOperator(ExpressionEnums.PLUSOP); }

@@ -67,7 +67,9 @@
     <Compile Include="IVisitableNode.cs" />
     <Compile Include="PrintVisitor.cs" />
     <Compile Include="SemanticsVisitor.cs" />
+    <Compile Include="TopDeclVisitor.cs" />
     <Compile Include="TypeDescriptor.cs" />
+    <Compile Include="TypeVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
