@@ -4,9 +4,9 @@
 
 // GPPG version 1.5.2
 // Machine:  HPERSIMMON
-// DateTime: 5/25/2017 4:14:36 PM
+// DateTime: 5/25/2017 10:51:46 PM
 // UserName: amgrieco
-// Input file <TCCL.grammar.y - 5/25/2017 4:14:32 PM>
+// Input file <TCCL.grammar.y - 5/25/2017 10:51:40 PM>
 
 // options: no-lines gplex
 
@@ -52,8 +52,8 @@ public class ScanObj {
 [GeneratedCodeAttribute( "Gardens Point Parser Generator", "1.5.2")]
 public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 {
-  // Verbatim content from TCCL.grammar.y - 5/25/2017 4:14:32 PM
-  // End verbatim content from TCCL.grammar.y - 5/25/2017 4:14:32 PM
+  // Verbatim content from TCCL.grammar.y - 5/25/2017 10:51:40 PM
+  // End verbatim content from TCCL.grammar.y - 5/25/2017 10:51:40 PM
 
 #pragma warning disable 649
   private static Dictionary<int, string> aliases;
@@ -657,10 +657,10 @@ public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 { CurrentSemanticValue = new ArithmeticUnaryOperator(ExpressionEnums.PLUSOP); }
         break;
       case 92: // PrimaryExpression -> QualifiedName
-{ CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
+{ CurrentSemanticValue = new PrimaryExpression(ValueStack[ValueStack.Depth-1]); }
         break;
       case 93: // PrimaryExpression -> NotJustName
-{ CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
+{ CurrentSemanticValue = new PrimaryExpression(ValueStack[ValueStack.Depth-1]); }
         break;
       case 94: // NotJustName -> SpecialName
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }

@@ -54,8 +54,7 @@ namespace Project3
                 {
                     string message = "Symbol table already contains id: " + id.ID;
                     Console.WriteLine(message); // TODO: delete
-                    id.TypeDescriptor = new ErrorDescriptor();
-                    ((ErrorDescriptor)identifier.TypeDescriptor).Message = message;
+                    id.TypeDescriptor = new ErrorDescriptor(message);
                     id.AttributesRef = null;
                 }
                 else
@@ -102,8 +101,7 @@ namespace Project3
                 {
                     string message = "Variable name cannot be redeclared: " + id;
                     Console.WriteLine(message); // TODO: delete
-                    identifier.TypeDescriptor = new ErrorDescriptor();
-                    ((ErrorDescriptor)identifier.TypeDescriptor).Message = message;
+                    identifier.TypeDescriptor = new ErrorDescriptor(message);
                     identifier.AttributesRef = null;
                 }
                 else
@@ -137,12 +135,12 @@ namespace Project3
 
             ClassTypeDescriptor typeRef = new ClassTypeDescriptor();
             typeRef.ClassBody = new ScopeTable();
-            ClassAttributes attr = new ClassAttributes();
+            Attr attr = new Attr();
             attr.Kind = Kind.ClassType;
             attr.TypeDescriptor = typeRef;
             string id = ((Identifier)identifier).ID;
             Table.enter(id, attr);
-            CurrentClass = attr;
+            CurrentClass = typeRef;
             node.TypeDescriptor = typeRef; // TODO: check if needed 
             node.AttributesRef = attr; // (not included in pseudocode)
 
@@ -231,13 +229,13 @@ namespace Project3
             {
                 // signature = parameter types + return value
                 parameterList.Accept(this);
-                attr.Signature = ((ParameterList)parameterList).
-                    AddReturnToSignature(attr.ReturnType);
+                //attr.Signature = ((ParameterList)parameterList).
+                //attr.Signature = ((ParameterList)parameterList).AddReturnToSignature(attr.ReturnType);
             }
             else
             {
                 // signature = return value only
-                attr.Signature = new Signature(attr.ReturnType);
+                attr.Signature = new SignatureDescriptor(attr.ReturnType);
             }
             methodBody.Accept(this);
             CurrentMethod = oldCurrentMethod;
@@ -257,8 +255,7 @@ namespace Project3
             {
                 string message = "Symbol table already contains id: " + id;
                 Console.WriteLine(message); // TODO: delete
-                identifier.TypeDescriptor = new ErrorDescriptor();
-                ((ErrorDescriptor)identifier.TypeDescriptor).Message = message;
+                identifier.TypeDescriptor = new ErrorDescriptor(message);
                 identifier.AttributesRef = null;
             }
             else
@@ -267,8 +264,6 @@ namespace Project3
                 attr.Kind = Kind.VariableAttributes;
                 attr.TypeDescriptor = declType;
                 Table.enter(id, attr);
-                Console.WriteLine("Entered into symbol table: " + id +
-                                  " " + attr); // TODO: DELETE
                 identifier.TypeDescriptor = declType;
                 identifier.AttributesRef = attr;
             }
@@ -282,20 +277,27 @@ namespace Project3
             methodReference.Accept(TypeVisitor);
             TypeDescriptor methodRefType = methodReference.TypeDescriptor;
 
+            MethodCallDescriptor descriptor = new MethodCallDescriptor();
+            descriptor.MethodRecerenceType = methodRefType;
+
             if (argumentList != null)
             {
-                AbstractNode child = argumentList.Child;
-                while (child != null)
+                AbstractNode expression = argumentList.Child;
+                while (expression != null)
                 {
-                    MethodReferenceAttributes attr = new MethodReferenceAttributes();
-                    Expression expression = (Expression)child;
                     expression.Accept(this);
-                    // TODO: these expressions (in the Argument List) should
-                    // probably hold a reference to the attribute? or should a 
-                    // list be kept of the expressions?
-                    child = child.Sib;
+                    descriptor.ExpressionAttributeRef.Add(expression.TypeDescriptor);
+                    expression = expression.Sib;
                 }
             }
+            node.TypeDescriptor = descriptor;
+        }
+
+        private void VisitNode(PrimaryExpression node)
+        {
+            AbstractNode child = node.Child;
+            child.Accept(this);
+            node.TypeDescriptor = child.TypeDescriptor;
         }
 
         private void VisitNode(Literal node)

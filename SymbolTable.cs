@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Project3
 {
     public class SymbolTable : AbstractSymbolTable, ISymbolTable
     {
+        private const bool PRINT_STATUS = true;
+
         private int nestLevel;
         private Stack<ScopeTable> symbolTable;
 
@@ -34,8 +37,7 @@ namespace Project3
         {
             ScopeTable currScopeTable = symbolTable.Pop();
             // Until given additional info, Java objects are placeholders
-            GeneralAttributes javaAttr =
-                new GeneralAttributes(new JavaObjectDescriptor());
+            Attr javaAttr = new Attr(new JavaObjectDescriptor());
             javaAttr.Kind = Kind.TypeAttributes;
             currScopeTable.Add("java", javaAttr);
             currScopeTable.Add("io", javaAttr);
@@ -46,18 +48,17 @@ namespace Project3
             currScopeTable.Add("outint", javaAttr);
             currScopeTable.Add("PrintStream", javaAttr);
             currScopeTable.Add("TestClasses", javaAttr);
-            currScopeTable.Add("WriteLine", javaAttr);
 
             // primitive types
             PrimitiveAttributes primVoidAttrs =
-                new PrimitiveAttributes(PrimitiveTypes.VOID);
-            currScopeTable.Add(primVoidAttrs.Name(), primVoidAttrs);
+                new PrimitiveAttributes(new PrimitiveTypeVoidDescriptor());
+            currScopeTable.Add("VOID", primVoidAttrs);
             PrimitiveAttributes primIntAttrs =
-                new PrimitiveAttributes(PrimitiveTypes.INT);
-            currScopeTable.Add(primIntAttrs.Name(), primIntAttrs);
+                new PrimitiveAttributes(new PrimitiveTypeIntDescriptor());
+            currScopeTable.Add("INT", primIntAttrs);
             PrimitiveAttributes primBooleanAttrs =
-                new PrimitiveAttributes(PrimitiveTypes.BOOLEAN);
-            currScopeTable.Add(primBooleanAttrs.Name(), primBooleanAttrs);
+                new PrimitiveAttributes(new PrimitiveTypeBooleanDescriptor());
+            currScopeTable.Add("BOOLEAN", primBooleanAttrs);
 
             // special names
             SpecialNameAttributes spNameThis = new SpecialNameAttributes
@@ -67,6 +68,25 @@ namespace Project3
                 SpecialNameEnums.NULL);
             currScopeTable.Add(spNameNull.Name, spNameNull);
 
+            // WriteLine
+            PrimitiveTypeVoidDescriptor returnType = new PrimitiveTypeVoidDescriptor();
+            // no parameters
+            SignatureDescriptor wlSigDescNone = new SignatureDescriptor(returnType);
+            // integer parameter
+            SignatureDescriptor wlSigDescInt = new SignatureDescriptor(returnType);
+            wlSigDescInt.AddParameter(new PrimitiveTypeIntDescriptor());
+            // boolean parameter
+            SignatureDescriptor wlSigDescBoolean = new SignatureDescriptor(returnType);
+            wlSigDescBoolean.AddParameter(new PrimitiveTypeBooleanDescriptor());
+            // literal parameter (string)
+            SignatureDescriptor wlSigDescLiteral = new SignatureDescriptor(returnType);
+            wlSigDescLiteral.AddParameter(new LiteralTypeDescriptor());
+            // chain signature type descriptors together
+            wlSigDescNone.Next = wlSigDescInt;
+            wlSigDescInt.Next = wlSigDescBoolean;
+            wlSigDescBoolean.Next = wlSigDescLiteral;
+            Attr sigAttr = new Attr(wlSigDescNone);
+            currScopeTable.Add("WriteLine", sigAttr);
 
             // TODO: add additional baseline information
 
@@ -108,6 +128,16 @@ namespace Project3
             ScopeTable currentScopeTable = symbolTable.Pop();
             currentScopeTable.Add(id, attr);
             symbolTable.Push(currentScopeTable);
+            if (PRINT_STATUS)
+            {
+                printStatus(id, attr, symbolTable);
+            }
+        }
+
+        private void printStatus(string id, Attributes attr, Stack<ScopeTable> scopeTables)
+        {
+            Console.WriteLine("[\"" + id + "\"" + ", " + attr + "] added to " +
+                              "Symbol Table, scope level: " + CurrentNestLevel);
         }
 
         public bool isDeclaredLocally(string id)

@@ -44,8 +44,7 @@ namespace Project3
                 string message = "This identifier is not a type name: "
                                  + node.ID;
                 Console.WriteLine(message); // TODO: delete me
-                node.TypeDescriptor = new ErrorDescriptor();
-                ((ErrorDescriptor)node.TypeDescriptor).Message = message;
+                node.TypeDescriptor = new ErrorDescriptor(message);
                 node.AttributesRef = null;
             }
         }
@@ -53,24 +52,21 @@ namespace Project3
         private void VisitNode(PrimitiveTypeVoid node)
         {
             Console.WriteLine("PrimitiveTypeVoid node visit in TypeVisitor.");
-            Attributes attr = Table.lookup(node.StringName);
-            node.TypeDescriptor = attr.TypeDescriptor;
+            Attributes attr = new PrimitiveAttributes(node.TypeDescriptor);
             node.AttributesRef = attr;
         }
 
         private void VisitNode(PrimitiveTypeInt node)
         {
             Console.WriteLine("PrimitiveTypeInt node visit in TypeVisitor.");
-            Attributes attr = Table.lookup(node.StringName);
-            node.TypeDescriptor = attr.TypeDescriptor;
+            Attributes attr = new PrimitiveAttributes(node.TypeDescriptor);
             node.AttributesRef = attr;
         }
 
         private void VisitNode(PrimitiveTypeBoolean node)
         {
             Console.WriteLine("PrimitiveTypeBoolean node visit in TypeVisitor.");
-            Attributes attr = Table.lookup(node.StringName);
-            node.TypeDescriptor = attr.TypeDescriptor;
+            Attributes attr = new PrimitiveAttributes(node.TypeDescriptor);
             node.AttributesRef = attr;
         }
 
@@ -109,11 +105,5 @@ namespace Project3
             node.TypeDescriptor = attr.TypeDescriptor;
             node.AttributesRef = attr;
         }
-
-        // ArrayDefining
-
-        // Struct Defining
-
-        // EnumDefining
     }
 }

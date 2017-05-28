@@ -20,7 +20,7 @@ namespace Project3
         private AbstractNode firstSib;
         private Type type;
 
-        public TypeDescriptor TypeDescriptor { get; set; }  //TODO, delete
+        public TypeDescriptor TypeDescriptor { get; set; }
         public Attributes AttributesRef { get; set; }
 
         public AbstractNode()
@@ -182,61 +182,6 @@ namespace Project3
             v.Visit(this);
         }
 
-        /*
-         * method?
-        typeVisitor ← new TypeVisitor() 56
-        call md.returnType.accept(typeVisitor )
-        attr ← new Attributes(MethodAttributes )
-        attr.returnType ← md.returnType.type
-        attr.modi f iers ← md.modi f iers
-        attr.isDe f inedIn ← getCurrentClass( )
-        attr.locals ← new SymbolTable()
-        call currentSymbolTable.enterSymbol(name.name, attr )
-        md.name.attributeRe f ← attr
-        call openScope(attr.locals )
-
-        oldCurrentMethod ← getCurrentMethod()
-        call setCurrentMethod(attr )
-        call md.parameters.accept(this ) 57
-        attr.signature ← parameters.signature.addReturn(attr.returntype )
-        call md.body.accept( this ) 58
-        call setCurrentMethod(oldCurrentMethod )
-        call closeScope()
-
-        procedure visit(ClassDeclaring cd )
-        typeRe f ← new TypeDescriptor (ClassType ) 51
-        typeRe f.names ← new SymbolTable ( )
-        attr ← new Attributes ( ClassAttributes )
-        attr.classType ← typeRe f
-        call currentSymbolTable.enterSymbol( name.name, attr )
-        call setCurrentClass( attr )
-        if cd.parentclass = null 52
-        then cd.parentclass ← getRefToObject( )
-        else
-        typeVisitor ← new TypeVisitor ( )
-        call cd.parentclass.accept( typeVisitor )
-        if cd.parentclass.type = errorType
-        then attr.classtype ← errorType
-        else
-        if cd.parentclass.type.kind  classType
-        then
-        attr.classtype ← errorType
-        call error( parentClass.name, ”does not name a class”)
-        else
-        typeRe f.parent ← cd.parentClass.attributeRe f 53
-        typeRe f.isFinal ← memberOf( cd.modi f iers,final )
-        typeRe f.isAbstractl ← memberOf( cd.modi f iers,abstract )
-        call typeRe f.names.incorporate( cd.parentclass.type.names ) 54
-        call openScope( typeRe f.names )
-        call cd. f ields.accept( this ) 55
-        call cd.constructors.accept( this )
-        call cd.methods.accept( this )
-        call closeScope( )
-        call setCurrentClass( null )
-        end
-        */
-
-
-}
+    }
 
 }

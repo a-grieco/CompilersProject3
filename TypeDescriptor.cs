@@ -11,10 +11,43 @@ namespace Project3
 
     public class ErrorDescriptor : TypeDescriptor
     {
-        public string Message { get; set; }
+        public ErrorDescriptor(string msg)
+        {
+            Message = msg;
+        }
+
+        public string Message { get; }
     }
 
     public class JavaObjectDescriptor : TypeDescriptor { }
+
+    public class SignatureDescriptor : TypeDescriptor
+    {
+        public TypeDescriptor ReturnType;
+        public List<TypeDescriptor> ParameterTypes { get; }
+        public SignatureDescriptor Next { get; set; }
+
+        public SignatureDescriptor()
+        {
+            ParameterTypes = new List<TypeDescriptor>();
+        }
+
+        public SignatureDescriptor(TypeDescriptor attrReturnType)
+        {
+            ReturnType = attrReturnType;
+            ParameterTypes = new List<TypeDescriptor>();
+        }
+
+        public void AddParameter(TypeDescriptor typeDescriptor)
+        {
+            ParameterTypes.Add(typeDescriptor);
+        }
+
+        public int NumParameters()
+        {
+            return ParameterTypes.Count;
+        }
+    }
 
     public class VariableDeclarationDescriptor : TypeDescriptor { }
 
@@ -24,49 +57,81 @@ namespace Project3
 
     public class ClassTypeDescriptor : TypeDescriptor
     {
-        public List<ModifiersEnums> Modifiers { get; set; }
+        //public ClassTypeDescriptor()
+        //{
+        //    Modifiers = new List<ModifiersEnums>();
+        //}
+        //public List<ModifiersEnums> Modifiers { get; set; }
         public ScopeTable ClassBody { get; set; }
     }
 
     public class MethodTypeDescriptor : TypeDescriptor { }
 
-    public enum PrimitiveTypes { VOID, INT, BOOLEAN }
+    public enum PrimitiveTypes { VOID, INT, BOOLEAN, OBJECT }
     public abstract class PrimitiveTypeDescriptor : TypeDescriptor
     {
         public virtual PrimitiveTypes PrimitiveTypes { get; }
-        public virtual string Name { get; }
     }
 
-    public class PrimitiveVoidTypeDescriptor : PrimitiveTypeDescriptor
+    public class PrimitiveTypeVoidDescriptor : PrimitiveTypeDescriptor
     {
         public override PrimitiveTypes PrimitiveTypes
         {
             get { return PrimitiveTypes.VOID; }
         }
-        public override string Name { get { return "VOID"; } }
     }
 
-    public class PrimitiveIntTypeDescriptor : PrimitiveTypeDescriptor
+    public class PrimitiveTypeIntDescriptor : PrimitiveTypeDescriptor
     {
         public override PrimitiveTypes PrimitiveTypes
         {
             get { return PrimitiveTypes.INT; }
         }
-        public override string Name { get { return "INT"; } }
     }
 
-    public class PrimitiveBooleanTypeDescriptor : PrimitiveTypeDescriptor
+    public class PrimitiveTypeBooleanDescriptor : PrimitiveTypeDescriptor
     {
         public override PrimitiveTypes PrimitiveTypes
         {
             get { return PrimitiveTypes.BOOLEAN; }
         }
-        public override string Name { get { return "BOOLEAN"; } }
     }
 
-    public class MethodCallDescriptor : TypeDescriptor { }
+    public class PrimitiveObjectTypeDescriptor : PrimitiveTypeDescriptor
+    {
+        public override PrimitiveTypes PrimitiveTypes
+        {
+            get { return PrimitiveTypes.OBJECT; }
+        }
+    }
 
-    public class SpecialNameDescriptor : TypeDescriptor { }
+
+    public class MethodCallDescriptor : TypeDescriptor
+    {
+        public MethodCallDescriptor()
+        {
+            ExpressionAttributeRef = new List<TypeDescriptor>();
+        }
+
+        public MethodCallDescriptor(TypeDescriptor methodRefType)
+        {
+            MethodRecerenceType = methodRefType;
+            ExpressionAttributeRef = new List<TypeDescriptor>();
+        }
+
+        public TypeDescriptor MethodRecerenceType { get; set; }
+        public List<TypeDescriptor> ExpressionAttributeRef { get; set; }    // TODO: refactor?
+    }
+
+    public class SpecialNameDescriptor : TypeDescriptor
+    {
+        public SpecialNameEnums SpecialNameType { get; set; }
+
+        public SpecialNameDescriptor(SpecialNameEnums type)
+        {
+            SpecialNameType = type;
+        }
+    }
 
     public class NotJustNameDescriptor : TypeDescriptor { }
 
@@ -75,6 +140,5 @@ namespace Project3
         public string Value { get; set; }
     }
 
-    //public class MethodReferenceDescriptor : TypeDescriptor { }
 
 }

@@ -41,11 +41,11 @@ namespace ASTBuilder
             SymbolTable symbolTable = new SymbolTable();
 
             TopDeclVisitor topDeclVisitor = new TopDeclVisitor(symbolTable);
-            Console.WriteLine("Starting declarations processing");
+            Console.WriteLine("\nStarting declarations processing");
             topDeclVisitor.CheckSemantics(CurrentSemanticValue);
 
             SemanticsVisitor semanticsVisitor = new SemanticsVisitor(symbolTable);
-            Console.WriteLine("Starting semantic checking");
+            Console.WriteLine("\nStarting semantic checking");
             semanticsVisitor.CheckSemantics(CurrentSemanticValue);
 
         }

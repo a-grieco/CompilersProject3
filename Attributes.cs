@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using ASTBuilder;
 
 namespace Project3
 {
@@ -31,6 +27,11 @@ namespace Project3
                 typeDescriptor = TypeDescriptor.GetType().Name;
             }
 
+            if (Notes().Length > 0)
+            {
+                return String.Format("{0} {1} {2}", 
+                    kind, typeDescriptor, Notes());
+            }
             return String.Format("{0} {1}", kind, typeDescriptor);
         }
 
@@ -38,6 +39,12 @@ namespace Project3
         {
             return "";
         }
+    }
+
+    public class Attr : Attributes
+    {
+        public Attr() { }
+        public Attr(TypeDescriptor typeDescriptor) : base(typeDescriptor) { }
     }
 
     public class GeneralAttributes : Attributes
@@ -68,55 +75,26 @@ namespace Project3
         public TypeDescriptor ReturnType { get; set; }
         public List<ModifiersEnums> Modifiers { get; set; }
         public ScopeTable Locals { get; set; }
-        public ClassAttributes IsDefinedIn { get; set; }
-        public Signature Signature { get; set; }
+        public ClassTypeDescriptor IsDefinedIn { get; set; }
+        public SignatureDescriptor Signature { get; set; }
     }
 
     public class PrimitiveAttributes : Attributes
     {
-        public PrimitiveAttributes(PrimitiveTypes type)
+        public PrimitiveAttributes(TypeDescriptor typeDescriptor)
         {
-            switch (type)
-            {
-                case PrimitiveTypes.VOID:
-                    TypeDescriptor = new PrimitiveVoidTypeDescriptor();
-                    break;
-                case PrimitiveTypes.INT:
-                    TypeDescriptor = new PrimitiveIntTypeDescriptor();
-                    break;
-                case PrimitiveTypes.BOOLEAN:
-                    TypeDescriptor = new PrimitiveBooleanTypeDescriptor();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type),
-                        type, null);
-            }
-        }
-
-        public string Name()
-        {
-            return ((PrimitiveTypeDescriptor)TypeDescriptor).Name;
-        }
-
-        public override string Notes()
-        {
-            return ((PrimitiveTypeDescriptor)TypeDescriptor).Name;
+            TypeDescriptor = typeDescriptor;
         }
     }
 
     public class ParameterAttributes : Attributes { }
-
-    public class MethodCallAttributes : Attributes
-    {
-
-    }
 
     public class SpecialNameAttributes : Attributes
     {
         public SpecialNameAttributes(SpecialNameEnums type)
         {
             SpecialNameType = type;
-            TypeDescriptor = new SpecialNameDescriptor();
+            TypeDescriptor = new SpecialNameDescriptor(type);
         }
 
         public SpecialNameEnums SpecialNameType { get; set; }
@@ -128,13 +106,4 @@ namespace Project3
         public TypeDescriptor NotJustNameTypeDescriptor { get; set; }
     }
 
-    public class MethodReferenceAttributes : Attributes
-    {
-        public ExpressionAttributes ExpressionAttributeRef { get; set; }
-    }
-
-    public class ExpressionAttributes : Attributes
-    {
-        
-    }
 }

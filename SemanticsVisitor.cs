@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Net.Configuration;
@@ -13,7 +14,7 @@ namespace Project3
     public class SemanticsVisitor : IReflectiveVisitor
     {
         public static SymbolTable Table { get; set; }
-        public static ClassAttributes CurrentClass { get; set; }
+        public static ClassTypeDescriptor CurrentClass { get; set; }
         public static MethodAttributes CurrentMethod { get; set; }
 
         public SemanticsVisitor(SymbolTable st)
@@ -55,6 +56,71 @@ namespace Project3
         {
             Console.WriteLine("VisitNode, SemanticsVisitor [" + node.GetType() + "]");
             VisitChildren(node);
+        }
+
+        private void VisitNode(ClassDeclaration node)
+        {
+            ErrorDescriptor error = null;
+            ClassTypeDescriptor descriptor = node.TypeDescriptor as ClassTypeDescriptor;
+            if (descriptor != null)
+            {
+                AbstractNode modifiers = node.Child;
+                AbstractNode identifier = modifiers.Sib;
+                AbstractNode classBody = identifier.Sib;
+
+                // check modifiers
+                //if(!(modifiers.TypeDescriptor is Modif))
+                modifiers.Accept(this);
+                ErrorDescriptor modError = modifiers.TypeDescriptor as ErrorDescriptor;
+                if (modError != null)
+                {
+                    error = modError;
+                }
+                // TO DO: is there a need to check identifiers?
+                //check class body
+                classBody.Accept(this);
+            }
+            else
+            {
+                error = node.TypeDescriptor as ErrorDescriptor;
+                if (error == null)
+                {
+                    Console.WriteLine("Type Checking failed at Class " +
+                                      "Declaration: node type is '" +
+                                      node.TypeDescriptor + "', s/b " +
+                                      "'ClassTypeDescriptor' or 'Error'");
+                }
+            }
+
+            if (error != null) { Console.WriteLine(error.Message); }
+        }
+
+        private void VisitNode(Modifiers node)
+        {
+            ErrorDescriptor error = checkModifiers(node.ModifierTokens);
+            if (error != null)
+            {
+                node.TypeDescriptor = error;
+            }
+        }
+
+        private ErrorDescriptor checkModifiers(List<ModifiersEnums> mods)
+        {
+            string message;
+            ErrorDescriptor error = null;
+            if (mods.Contains(ModifiersEnums.PRIVATE) &&
+                    mods.Contains(ModifiersEnums.PUBLIC))
+            {
+                message = "Cannot contain both modifiers PUBLIC and PRVATE.";
+                error = new ErrorDescriptor(message);
+            }
+            if (mods.Count <= 0)
+            {
+                message = "Must contain at least one modifier PUBLIC, " +
+                          "PRIVATE, or STATIC";
+                error = new ErrorDescriptor(message);
+            }
+            return error;
         }
     }
 }

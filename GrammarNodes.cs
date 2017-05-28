@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -47,12 +48,6 @@ namespace Project3
         public void AddModifier(ModifiersEnums modToken)
         {
             ModifierTokens.Add(modToken);
-            if (ModifierTokens.Contains(ModifiersEnums.PUBLIC) &&
-                ModifierTokens.Contains(ModifiersEnums.PRIVATE))
-            {
-                throw new ArgumentException("Illegal modifiers: must be PUBLIC " +
-                                            "or PRIVATE, cannot be both");
-            }
         }
     }
 
@@ -124,20 +119,26 @@ namespace Project3
 
     public class PrimitiveTypeVoid : AbstractNode
     {
-        private string _stringName = "VOID";
-        public string StringName { get { return _stringName; } }
+        public PrimitiveTypeVoid()
+        {
+            TypeDescriptor = new PrimitiveTypeVoidDescriptor();
+        }
     }
 
     public class PrimitiveTypeInt : AbstractNode
     {
-        private string _stringName = "INT";
-        public string StringName { get { return _stringName; } }
+        public PrimitiveTypeInt()
+        {
+            TypeDescriptor = new PrimitiveTypeIntDescriptor();
+        }
     }
 
     public class PrimitiveTypeBoolean : AbstractNode
     {
-        private string _stringName = "BOOLEAN";
-        public string StringName { get { return _stringName; } }
+        public PrimitiveTypeBoolean()
+        {
+            TypeDescriptor = new PrimitiveTypeBooleanDescriptor();
+        }
     }
 
     public class FieldVariableDeclarators : AbstractNode
@@ -178,45 +179,16 @@ namespace Project3
         }
     }
 
-    public class Signature
-    {
-        public TypeDescriptor ReturnType;
-        public List<string> ParameterTypes;
-
-        public Signature()
-        {
-            ParameterTypes = new List<string>();
-        }
-
-        public Signature(TypeDescriptor attrReturnType)
-        {
-            ReturnType = attrReturnType;
-            ParameterTypes = new List<string>();
-        }
-    }
-
     public class ParameterList : AbstractNode
     {
-        public Signature ParamSignature = new Signature();
-
         public ParameterList(AbstractNode parameter)
         {
             adoptChildren(parameter);
-            ParamSignature.ParameterTypes.Add(
-                ((Parameter)parameter).GetParamType());
         }
 
         public void AddParameter(AbstractNode parameter)
         {
             adoptChildren(parameter);
-            ParamSignature.ParameterTypes.Add(
-                ((Parameter)parameter).GetParamType());
-        }
-
-        public Signature AddReturnToSignature(TypeDescriptor attrReturnType)
-        {
-            ParamSignature.ReturnType = attrReturnType;
-            return ParamSignature;
         }
     }
 
@@ -459,6 +431,14 @@ namespace Project3
         public ArithmeticUnaryOperator(ExpressionEnums op)
         {
             this.op = op;
+        }
+    }
+
+    public class PrimaryExpression : AbstractNode
+    {
+        public PrimaryExpression(AbstractNode node)
+        {
+            adoptChildren(node);
         }
     }
 

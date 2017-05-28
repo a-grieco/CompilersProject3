@@ -223,8 +223,8 @@ ArithmeticUnaryOperator		:	PLUSOP	{ $$ = new ArithmeticUnaryOperator(ExpressionE
 							|   MINUSOP	{ $$ = new ArithmeticUnaryOperator(ExpressionEnums.PLUSOP); }
 							;
 							
-PrimaryExpression			:	QualifiedName	{ $$ = $1; }
-							|   NotJustName		{ $$ = $1; }
+PrimaryExpression			:	QualifiedName	{ $$ = new PrimaryExpression($1); }
+							|   NotJustName		{ $$ = new PrimaryExpression($1); }
 							;
 
 NotJustName					:	SpecialName		{ $$ = $1; }
