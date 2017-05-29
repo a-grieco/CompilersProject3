@@ -96,6 +96,14 @@ namespace Project3
         }
     }
 
+    public class TypeSpecifier : AbstractNode
+    {
+        public TypeSpecifier(AbstractNode node)
+        {
+            adoptChildren(node);
+        }
+    }
+
     public class ArraySpecifier : AbstractNode
     {
         public ArraySpecifier(AbstractNode typeName)
@@ -449,6 +457,7 @@ namespace Project3
         public Literal(string literal)
         {
             Lit = literal;
+            TypeDescriptor=new LiteralTypeDescriptor(literal);
         }
     }
 
@@ -483,6 +492,7 @@ namespace Project3
         public SpecialName(SpecialNameEnums specialName)
         {
             Name = specialName;
+            TypeDescriptor = new SpecialNameDescriptor(specialName);
         }
     }
 
@@ -499,10 +509,11 @@ namespace Project3
     public class Number : AbstractNode
     {
         public int Num { get; }
-
+        
         public Number(string intNumber)
         {
             Num = Int32.Parse(intNumber);
+            TypeDescriptor = new NumberTypeDescriptor(Num);
         }
     }
 }

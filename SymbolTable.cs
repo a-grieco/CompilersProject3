@@ -71,21 +71,22 @@ namespace Project3
             // WriteLine
             PrimitiveTypeVoidDescriptor returnType = new PrimitiveTypeVoidDescriptor();
             // no parameters
-            SignatureDescriptor wlSigDescNone = new SignatureDescriptor(returnType);
+            SignatureDescriptor sigDescNone = new SignatureDescriptor(returnType);
             // integer parameter
-            SignatureDescriptor wlSigDescInt = new SignatureDescriptor(returnType);
-            wlSigDescInt.AddParameter(new PrimitiveTypeIntDescriptor());
+            SignatureDescriptor sigDescInt = new SignatureDescriptor(returnType);
+            sigDescInt.AddParameter(new PrimitiveTypeIntDescriptor());
             // boolean parameter
-            SignatureDescriptor wlSigDescBoolean = new SignatureDescriptor(returnType);
-            wlSigDescBoolean.AddParameter(new PrimitiveTypeBooleanDescriptor());
+            SignatureDescriptor sigDescBoolean = new SignatureDescriptor(returnType);
+            sigDescBoolean.AddParameter(new PrimitiveTypeBooleanDescriptor());
             // literal parameter (string)
-            SignatureDescriptor wlSigDescLiteral = new SignatureDescriptor(returnType);
-            wlSigDescLiteral.AddParameter(new LiteralTypeDescriptor());
+            SignatureDescriptor sigDescLiteral = new SignatureDescriptor(returnType);
+            sigDescLiteral.AddParameter(new LiteralTypeDescriptor());
             // chain signature type descriptors together
-            wlSigDescNone.Next = wlSigDescInt;
-            wlSigDescInt.Next = wlSigDescBoolean;
-            wlSigDescBoolean.Next = wlSigDescLiteral;
-            Attr sigAttr = new Attr(wlSigDescNone);
+            sigDescNone.Next = sigDescInt;
+            sigDescInt.Next = sigDescBoolean;
+            sigDescBoolean.Next = sigDescLiteral;
+            Attr sigAttr = new Attr(sigDescNone);
+            currScopeTable.Add("Write", sigAttr);
             currScopeTable.Add("WriteLine", sigAttr);
 
             // TODO: add additional baseline information

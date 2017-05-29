@@ -80,8 +80,8 @@ TypeSpecifier				:	TypeName		{ $$ = $1; }
 							| 	ArraySpecifier	{ $$ = $1; }
 							;
 
-TypeName					:	PrimitiveType	{ $$ = $1; }
-							|   QualifiedName	{ $$ = $1; }
+TypeName					:	PrimitiveType	{ $$ = new TypeSpecifier($1); }
+							|   QualifiedName	{ $$ = new TypeSpecifier($1); }
 							;
 
 ArraySpecifier				: 	TypeName LBRACKET RBRACKET	{ $$ = new ArraySpecifier($1); }

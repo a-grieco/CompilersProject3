@@ -52,21 +52,21 @@ namespace Project3
         private void VisitNode(PrimitiveTypeVoid node)
         {
             Console.WriteLine("PrimitiveTypeVoid node visit in TypeVisitor.");
-            Attributes attr = new PrimitiveAttributes(node.TypeDescriptor);
+            Attributes attr = new Attr(node.TypeDescriptor);
             node.AttributesRef = attr;
         }
 
         private void VisitNode(PrimitiveTypeInt node)
         {
             Console.WriteLine("PrimitiveTypeInt node visit in TypeVisitor.");
-            Attributes attr = new PrimitiveAttributes(node.TypeDescriptor);
+            Attributes attr = new Attr(node.TypeDescriptor);
             node.AttributesRef = attr;
         }
 
         private void VisitNode(PrimitiveTypeBoolean node)
         {
             Console.WriteLine("PrimitiveTypeBoolean node visit in TypeVisitor.");
-            Attributes attr = new PrimitiveAttributes(node.TypeDescriptor);
+            Attributes attr = new Attr(node.TypeDescriptor);
             node.AttributesRef = attr;
         }
 

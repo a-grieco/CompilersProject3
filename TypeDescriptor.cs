@@ -49,18 +49,14 @@ namespace Project3
         }
     }
 
-    public class VariableDeclarationDescriptor : TypeDescriptor { }
+    //public class VariableDeclarationDescriptor : TypeDescriptor { }
 
-    public class IntegerTypeDescriptor : TypeDescriptor { }
+    //public class IntegerTypeDescriptor : TypeDescriptor { }
 
-    public class ArrayTypeDescriptor : TypeDescriptor { }
+    //public class ArrayTypeDescriptor : TypeDescriptor { }
 
     public class ClassTypeDescriptor : TypeDescriptor
     {
-        //public ClassTypeDescriptor()
-        //{
-        //    Modifiers = new List<ModifiersEnums>();
-        //}
         public List<ModifiersEnums> Modifiers { get; set; }
         public ScopeTable ClassBody { get; set; }
     }
@@ -112,6 +108,15 @@ namespace Project3
         }
     }
 
+    public class NumberTypeDescriptor : TypeDescriptor
+    {
+        public int Num { get; }
+        public NumberTypeDescriptor(int num)
+        {
+            Num = num;
+        }
+    }
+
 
     //public class MethodCallDescriptor : TypeDescriptor
     //{
@@ -145,6 +150,13 @@ namespace Project3
     public class LiteralTypeDescriptor : TypeDescriptor
     {
         public string Value { get; set; }
+
+        public LiteralTypeDescriptor() { }
+
+        public LiteralTypeDescriptor(string val)
+        {
+            Value = val;
+        }
     }
 
 

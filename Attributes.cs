@@ -11,6 +11,8 @@ namespace Project3
 
         public TypeDescriptor TypeDescriptor { get; set; }
 
+        public Boolean IsAssignable { get; set; }
+
         protected Attributes() { }
 
         protected Attributes(TypeDescriptor type)
@@ -47,10 +49,10 @@ namespace Project3
         public Attr(TypeDescriptor typeDescriptor) : base(typeDescriptor) { }
     }
 
-    public class GeneralAttributes : Attributes
-    {
-        public GeneralAttributes(TypeDescriptor type) : base(type) { }
-    }
+    //public class GeneralAttributes : Attributes
+    //{
+    //    public GeneralAttributes(TypeDescriptor type) : base(type) { }
+    //}
 
     // LocalVariableDeclarationStatement & FieldVariableDeclaration
     public class VariableDeclarationAttributes : Attributes
@@ -68,16 +70,16 @@ namespace Project3
         }
     }
 
-    public class ClassAttributes : Attributes { }
+    //public class ClassAttributes : Attributes { }
 
-    public class MethodAttributes : Attributes
-    {
-        public TypeDescriptor ReturnType { get; set; }
-        public List<ModifiersEnums> Modifiers { get; set; }
-        public ScopeTable Locals { get; set; }
-        public ClassTypeDescriptor IsDefinedIn { get; set; }
-        public SignatureDescriptor Signature { get; set; }
-    }
+    //public class MethodAttributes : Attributes
+    //{
+    //    public TypeDescriptor ReturnType { get; set; }
+    //    public List<ModifiersEnums> Modifiers { get; set; }
+    //    public ScopeTable Locals { get; set; }
+    //    public ClassTypeDescriptor IsDefinedIn { get; set; }
+    //    public SignatureDescriptor Signature { get; set; }
+    //}
 
     public class PrimitiveAttributes : Attributes
     {

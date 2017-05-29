@@ -5,10 +5,12 @@ namespace Project3
 {
     public class TopDeclVisitor : SemanticsVisitor
     {
+        public SemanticsVisitor SemanticsVisitor { get; set; }
         public TypeVisitor TypeVisitor { get; set; }
 
         public TopDeclVisitor(SymbolTable st) : base(st)
         {
+            SemanticsVisitor = new SemanticsVisitor(st);
             TypeVisitor = new TypeVisitor(st);
         }
 
@@ -43,7 +45,7 @@ namespace Project3
             AbstractNode localVariableDeclarators = typeSpecifier.Sib;
 
 
-            typeSpecifier.Accept(TypeVisitor);
+            typeSpecifier.Accept(this);
             TypeDescriptor declType = typeSpecifier.TypeDescriptor;
 
             AbstractNode identifier = localVariableDeclarators.Child;
@@ -63,10 +65,9 @@ namespace Project3
                         new VariableDeclarationAttributes();
                     attr.Kind = Kind.VariableAttributes;
                     attr.TypeDescriptor = declType;
+                    attr.IsAssignable = true;
                     attr.Modifiers = null;
                     Table.enter(id.ID, attr);
-                    Console.WriteLine("Entered into symbol table: " + id.ID +
-                                      " " + attr); // TODO: DELETE
                     id.TypeDescriptor = declType;
                     id.AttributesRef = attr;
                 }
@@ -111,6 +112,7 @@ namespace Project3
                     attr.Kind = Kind.VariableAttributes;
                     attr.TypeDescriptor = identifier.TypeDescriptor;
                     attr.Modifiers = modifiersList;
+                    attr.IsAssignable = true;
                     Table.enter(id, attr);
                     Console.WriteLine("Entered into symbol table: " + id +
                                       " " + attr); // TODO: DELETE
@@ -195,21 +197,22 @@ namespace Project3
             AbstractNode methodDeclarator = typeSpecifier.Sib;
             AbstractNode methodBody = methodDeclarator.Sib;
 
-            if (typeSpecifier is PrimitiveTypeVoid)
+            AbstractNode type = typeSpecifier.Child;
+            if (type is PrimitiveTypeVoid)
             {
-                ((PrimitiveTypeVoid)typeSpecifier).Accept(TypeVisitor);
+                ((PrimitiveTypeVoid)type).Accept(TypeVisitor);
             }
-            else if (typeSpecifier is PrimitiveTypeBoolean)
+            else if (type is PrimitiveTypeBoolean)
             {
-                ((PrimitiveTypeBoolean)typeSpecifier).Accept(TypeVisitor);
+                ((PrimitiveTypeBoolean)type).Accept(TypeVisitor);
             }
-            else if (typeSpecifier is PrimitiveTypeInt)
+            else if (type is PrimitiveTypeInt)
             {
-                ((PrimitiveTypeInt)typeSpecifier).Accept(TypeVisitor);
+                ((PrimitiveTypeInt)type).Accept(TypeVisitor);
             }
-            else if (typeSpecifier is QualifiedName)
+            else if (type is QualifiedName)
             {
-                ((QualifiedName)typeSpecifier).Accept(TypeVisitor);
+                ((QualifiedName)type).Accept(TypeVisitor);
             }
             else
             {
@@ -218,7 +221,7 @@ namespace Project3
             }
 
             MethodTypeDescriptor descriptor = new MethodTypeDescriptor();
-            descriptor.ReturnType = typeSpecifier.TypeDescriptor;
+            descriptor.ReturnType = type.TypeDescriptor;
             descriptor.Modifiers = ((Modifiers)modifiers).ModifierTokens;
             descriptor.Locals = new ScopeTable();
             descriptor.IsDefinedIn = CurrentClass;
@@ -297,12 +300,23 @@ namespace Project3
             node.TypeDescriptor = child.TypeDescriptor;
         }
 
+        private void VisitNode(Expression node)
+        {
+            node.Accept(SemanticsVisitor);
+        }
+
         private void VisitNode(Literal node)
         {
             var desc = new LiteralTypeDescriptor { Value = node.Lit };
             node.TypeDescriptor = desc;
         }
 
-
+        private void VisitNode(TypeSpecifier node)
+        {
+            AbstractNode child = node.Child;    // QualifiedName or PrimitiveType
+            child.Accept(TypeVisitor);
+            child.AttributesRef.IsAssignable = true;
+            node.TypeDescriptor = child.TypeDescriptor;
+        }
     }
 }

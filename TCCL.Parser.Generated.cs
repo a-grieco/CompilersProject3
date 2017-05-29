@@ -4,9 +4,9 @@
 
 // GPPG version 1.5.2
 // Machine:  HPERSIMMON
-// DateTime: 5/25/2017 10:51:46 PM
+// DateTime: 5/29/2017 12:43:42 AM
 // UserName: amgrieco
-// Input file <TCCL.grammar.y - 5/25/2017 10:51:40 PM>
+// Input file <TCCL.grammar.y - 5/29/2017 12:43:35 AM>
 
 // options: no-lines gplex
 
@@ -52,8 +52,8 @@ public class ScanObj {
 [GeneratedCodeAttribute( "Gardens Point Parser Generator", "1.5.2")]
 public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 {
-  // Verbatim content from TCCL.grammar.y - 5/25/2017 10:51:40 PM
-  // End verbatim content from TCCL.grammar.y - 5/25/2017 10:51:40 PM
+  // Verbatim content from TCCL.grammar.y - 5/29/2017 12:43:35 AM
+  // End verbatim content from TCCL.grammar.y - 5/29/2017 12:43:35 AM
 
 #pragma warning disable 649
   private static Dictionary<int, string> aliases;
@@ -444,10 +444,10 @@ public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 { CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
         break;
       case 23: // TypeName -> PrimitiveType
-{ CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
+{ CurrentSemanticValue = new TypeSpecifier(ValueStack[ValueStack.Depth-1]); }
         break;
       case 24: // TypeName -> QualifiedName
-{ CurrentSemanticValue = ValueStack[ValueStack.Depth-1]; }
+{ CurrentSemanticValue = new TypeSpecifier(ValueStack[ValueStack.Depth-1]); }
         break;
       case 25: // ArraySpecifier -> TypeName, LBRACKET, RBRACKET
 { CurrentSemanticValue = new ArraySpecifier(ValueStack[ValueStack.Depth-3]); }
