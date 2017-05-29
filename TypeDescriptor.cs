@@ -24,7 +24,7 @@ namespace Project3
     public class SignatureDescriptor : TypeDescriptor
     {
         public TypeDescriptor ReturnType;
-        public List<TypeDescriptor> ParameterTypes { get; }
+        public List<TypeDescriptor> ParameterTypes { get; set; }
         public SignatureDescriptor Next { get; set; }
 
         public SignatureDescriptor()
@@ -61,11 +61,18 @@ namespace Project3
         //{
         //    Modifiers = new List<ModifiersEnums>();
         //}
-        //public List<ModifiersEnums> Modifiers { get; set; }
+        public List<ModifiersEnums> Modifiers { get; set; }
         public ScopeTable ClassBody { get; set; }
     }
 
-    public class MethodTypeDescriptor : TypeDescriptor { }
+    public class MethodTypeDescriptor : TypeDescriptor
+    {
+        public TypeDescriptor ReturnType { get; set; }
+        public List<ModifiersEnums> Modifiers { get; set; }
+        public ScopeTable Locals { get; set; }
+        public ClassTypeDescriptor IsDefinedIn { get; set; }
+        public SignatureDescriptor Signature { get; set; }
+    }
 
     public enum PrimitiveTypes { VOID, INT, BOOLEAN, OBJECT }
     public abstract class PrimitiveTypeDescriptor : TypeDescriptor
@@ -106,22 +113,22 @@ namespace Project3
     }
 
 
-    public class MethodCallDescriptor : TypeDescriptor
-    {
-        public MethodCallDescriptor()
-        {
-            ExpressionAttributeRef = new List<TypeDescriptor>();
-        }
+    //public class MethodCallDescriptor : TypeDescriptor
+    //{
+    //    public MethodCallDescriptor()
+    //    {
+    //        ExpressionAttributeRef = new List<TypeDescriptor>();
+    //    }
 
-        public MethodCallDescriptor(TypeDescriptor methodRefType)
-        {
-            MethodRecerenceType = methodRefType;
-            ExpressionAttributeRef = new List<TypeDescriptor>();
-        }
+    //    public MethodCallDescriptor(TypeDescriptor methodRefType)
+    //    {
+    //        MethodRecerenceType = methodRefType;
+    //        ExpressionAttributeRef = new List<TypeDescriptor>();
+    //    }
 
-        public TypeDescriptor MethodRecerenceType { get; set; }
-        public List<TypeDescriptor> ExpressionAttributeRef { get; set; }    // TODO: refactor?
-    }
+    //    public TypeDescriptor MethodRecerenceType { get; set; }
+    //    public List<TypeDescriptor> ExpressionAttributeRef { get; set; }    // TODO: refactor?
+    //}
 
     public class SpecialNameDescriptor : TypeDescriptor
     {

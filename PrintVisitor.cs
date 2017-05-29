@@ -43,20 +43,17 @@ namespace Project3
 
         private void PrintAttribute(AbstractNode node)
         {
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
-            //Console.Write("  *" + node.AttributesRef);
-            //Console.ForegroundColor = ConsoleColor.DarkGray;
-            //Console.WriteLine("  *" + node.TypeDescriptor);
             if (node.AttributesRef != null)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.WriteLine("  " + node.AttributesRef);
             }
-            else
+            else if (node.TypeDescriptor != null)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("\t" + node.TypeDescriptor);
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("  " + node.TypeDescriptor.GetType().Name);
             }
+            else { Console.WriteLine(); }
             Console.ResetColor();
         }
 

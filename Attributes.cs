@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Project3
 {
-    public enum Kind { TypeAttributes, VariableAttributes, ClassType, PrimitiveType }
+    public enum Kind { TypeAttributes, VariableAttributes, ClassType, MethodType }
 
     public abstract class Attributes
     {

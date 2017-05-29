@@ -42,7 +42,7 @@ namespace Project3
             AbstractNode typeSpecifier = node.Child;
             AbstractNode localVariableDeclarators = typeSpecifier.Sib;
 
-            
+
             typeSpecifier.Accept(TypeVisitor);
             TypeDescriptor declType = typeSpecifier.TypeDescriptor;
 
@@ -135,6 +135,17 @@ namespace Project3
 
             ClassTypeDescriptor typeRef = new ClassTypeDescriptor();
             typeRef.ClassBody = new ScopeTable();
+            Modifiers mods = modifiers as Modifiers;
+            if (mods != null)
+            {
+                typeRef.Modifiers = mods.ModifierTokens;
+            }
+            else
+            {
+                node.TypeDescriptor =
+                    new ErrorDescriptor("Expected modifier node.");
+            }
+
             Attr attr = new Attr();
             attr.Kind = Kind.ClassType;
             attr.TypeDescriptor = typeRef;
@@ -206,13 +217,14 @@ namespace Project3
                                             "be a PrimitiveType or QualifiedName");
             }
 
-            MethodAttributes attr = new MethodAttributes();
-            attr.TypeDescriptor = new MethodTypeDescriptor();
-            //TODO: method doesn't seem to need or use a type descriptor
-            attr.ReturnType = typeSpecifier.TypeDescriptor;
-            attr.Modifiers = ((Modifiers)modifiers).ModifierTokens;
-            attr.IsDefinedIn = CurrentClass;
-            attr.Locals = new ScopeTable();
+            MethodTypeDescriptor descriptor = new MethodTypeDescriptor();
+            descriptor.ReturnType = typeSpecifier.TypeDescriptor;
+            descriptor.Modifiers = ((Modifiers)modifiers).ModifierTokens;
+            descriptor.Locals = new ScopeTable();
+            descriptor.IsDefinedIn = CurrentClass;
+
+            Attributes attr = new Attr(descriptor);
+            attr.Kind = Kind.MethodType;
 
             AbstractNode methodDeclaratorName = methodDeclarator.Child;
             AbstractNode parameterList = methodDeclaratorName.Sib; // may be null
@@ -222,24 +234,33 @@ namespace Project3
             node.TypeDescriptor = attr.TypeDescriptor;
             node.AttributesRef = attr;
 
-            Table.openScope(attr.Locals);
-            MethodAttributes oldCurrentMethod = CurrentMethod;
-            CurrentMethod = attr;
+            Table.openScope(descriptor.Locals);
+            MethodTypeDescriptor oldCurrentMethod = CurrentMethod;
+            CurrentMethod = descriptor;
+
+            descriptor.Signature = new SignatureDescriptor
+                    (descriptor.ReturnType);
             if (parameterList != null)
             {
-                // signature = parameter types + return value
                 parameterList.Accept(this);
-                //attr.Signature = ((ParameterList)parameterList).
-                //attr.Signature = ((ParameterList)parameterList).AddReturnToSignature(attr.ReturnType);
-            }
-            else
-            {
-                // signature = return value only
-                attr.Signature = new SignatureDescriptor(attr.ReturnType);
+                descriptor.Signature.ParameterTypes =
+                    getParameterTypes(parameterList);
             }
             methodBody.Accept(this);
             CurrentMethod = oldCurrentMethod;
             Table.closeScope();
+        }
+
+        private List<TypeDescriptor> getParameterTypes(AbstractNode paramList)
+        {
+            List<TypeDescriptor> parameterTypes = new List<TypeDescriptor>();
+            Parameter param = (Parameter)paramList.Child;
+            while (param != null)
+            {
+                parameterTypes.Add(param.TypeDescriptor);
+                param = (Parameter)param.Sib;
+            }
+            return parameterTypes;
         }
 
         private void VisitNode(Parameter node)
@@ -269,30 +290,6 @@ namespace Project3
             }
         }
 
-        private void VisitNode(MethodCall node)
-        {
-            AbstractNode methodReference = node.Child;
-            AbstractNode argumentList = methodReference.Sib;    // may be null
-
-            methodReference.Accept(TypeVisitor);
-            TypeDescriptor methodRefType = methodReference.TypeDescriptor;
-
-            MethodCallDescriptor descriptor = new MethodCallDescriptor();
-            descriptor.MethodRecerenceType = methodRefType;
-
-            if (argumentList != null)
-            {
-                AbstractNode expression = argumentList.Child;
-                while (expression != null)
-                {
-                    expression.Accept(this);
-                    descriptor.ExpressionAttributeRef.Add(expression.TypeDescriptor);
-                    expression = expression.Sib;
-                }
-            }
-            node.TypeDescriptor = descriptor;
-        }
-
         private void VisitNode(PrimaryExpression node)
         {
             AbstractNode child = node.Child;
@@ -302,7 +299,7 @@ namespace Project3
 
         private void VisitNode(Literal node)
         {
-            var desc = new LiteralTypeDescriptor {Value = node.Lit};
+            var desc = new LiteralTypeDescriptor { Value = node.Lit };
             node.TypeDescriptor = desc;
         }
 
