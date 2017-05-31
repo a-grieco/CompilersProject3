@@ -86,12 +86,6 @@ namespace Project3
         public List<TypeDescriptor> ParamTypeDescriptors { get; set; }
     }
 
-    //public class VariableDeclarationDescriptor : TypeDescriptor { }
-
-    //public class IntegerTypeDescriptor : TypeDescriptor { }
-
-    //public class ArrayTypeDescriptor : TypeDescriptor { }
-
     public class ClassTypeDescriptor : TypeDescriptor
     {
         public List<ModifiersEnums> Modifiers { get; set; }
@@ -113,6 +107,17 @@ namespace Project3
         }
     }
 
+
+    public class SelectionStatementDescriptor : TypeDescriptor
+    {
+        public Boolean IfEval { get; set; }
+        public Boolean HasElseStmt { get; set; }
+        public TypeDescriptor TypeDescriptor { get; set; }
+        public TypeDescriptor IfDescriptor { get; set; }
+        public TypeDescriptor ThanDescriptor { get; set; }
+        public TypeDescriptor ElseDescriptor { get; set; }
+    }
+
     public enum PrimitiveTypes { VOID, INT, BOOLEAN, OBJECT }
     public abstract class PrimitiveTypeDescriptor : TypeDescriptor
     {
@@ -128,7 +133,7 @@ namespace Project3
         }
     }
 
-    [DebuggerDisplay("INT")]
+    [DebuggerDisplay("PrimitiveTypeIntDescriptor (INT)")]
     public class PrimitiveTypeIntDescriptor : PrimitiveTypeDescriptor
     {
         public override PrimitiveTypes PrimitiveTypes
@@ -137,7 +142,7 @@ namespace Project3
         }
     }
 
-    [DebuggerDisplay("BOOLEAN")]
+    [DebuggerDisplay("PrimitiveTypeBooleanDescriptor (BOOLEAN)")]
     public class PrimitiveTypeBooleanDescriptor : PrimitiveTypeDescriptor
     {
         public override PrimitiveTypes PrimitiveTypes
@@ -154,7 +159,7 @@ namespace Project3
         }
     }
 
-    [DebuggerDisplay("Number: {Num}")]
+    [DebuggerDisplay("NumberTypeDescriptor: {" + nameof(Num) + "}")]
     public class NumberTypeDescriptor : TypeDescriptor
     {
         public int Num { get; }
@@ -164,6 +169,7 @@ namespace Project3
         }
     }
 
+    [DebuggerDisplay("SpecialNameDescriptor: {" + nameof(SpecialNameType) + "}")]
     public class SpecialNameDescriptor : TypeDescriptor
     {
         public SpecialNameEnums SpecialNameType { get; set; }
@@ -176,7 +182,7 @@ namespace Project3
 
     public class NotJustNameDescriptor : TypeDescriptor { }
 
-    [DebuggerDisplay("Literal: {Value}")]
+    [DebuggerDisplay("LiteralTypeDescriptor: {Value}")]
     public class LiteralTypeDescriptor : TypeDescriptor
     {
         public string Value { get; set; }

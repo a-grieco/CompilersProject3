@@ -148,6 +148,24 @@ namespace Project3
             PrintAttribute(node);
         }
 
+        public void VisitNode(SelectionStatement node)
+        {
+            Console.Write("<" + node.ClassName() + ">: ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("IF");
+            Console.ResetColor();
+            PrintAttribute(node);
+        }
+
+        public void VisitNode(ElseStatement node)
+        {
+            Console.Write("<" + node.ClassName() + ">: ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("ELSE");
+            Console.ResetColor();
+            PrintAttribute(node);
+        }
+
         public void VisitNode(SpecialName node)
         {
             Console.Write("<" + node.ClassName() + ">: ");

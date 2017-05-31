@@ -108,7 +108,7 @@ namespace Project3
             else
             {
                 // get parameters from method call
-                List<TypeDescriptor> argListTypes = 
+                List<TypeDescriptor> argListTypes =
                     GetParameterTypes(argumentList as ArgumentList);
 
                 // get parameters (signature) from declared method
@@ -156,6 +156,103 @@ namespace Project3
                 methodCallAttr.Kind = Kind.MethodType;
                 node.AttributesRef = methodCallAttr;
             }
+        }
+
+        private void VisitNode(SelectionStatement node)
+        {
+            AbstractNode ifExp = node.Child;
+            AbstractNode thanStmt = ifExp.Sib;
+            AbstractNode elseStmt = thanStmt.Sib;   // may be null
+
+            SelectionStatementDescriptor ssDesc =
+                new SelectionStatementDescriptor();
+
+            Boolean ifEval;
+            String errMsg = "";
+
+            // if expression
+            ifExp.Accept(this);
+            ssDesc.IfDescriptor = ifExp.TypeDescriptor;
+            PrimitiveTypeBooleanDescriptor ifBoolDesc =
+                ifExp.TypeDescriptor as PrimitiveTypeBooleanDescriptor;
+            if (ifBoolDesc == null)
+            {
+                errMsg = "If statement does not evaluate to a Boolean " +
+                          "expression. (Has type: " +
+                          ifExp.TypeDescriptor.GetType().Name + ")" + errMsg;
+            }
+            // than statement
+            thanStmt.Accept(this);
+            ssDesc.ThanDescriptor = thanStmt.TypeDescriptor;
+            if (!IsCompatibleStatement(thanStmt.TypeDescriptor))
+            {
+                if (errMsg.Length > 0) { errMsg += "\n"; }
+                errMsg += "Non-compatible THAN statement type: " +
+                          thanStmt.TypeDescriptor.GetType().Name;
+            }
+            // else statement
+            if (elseStmt != null)
+            {
+                elseStmt.Accept(this);
+                ssDesc.HasElseStmt = true;
+                ssDesc.ElseDescriptor = elseStmt.TypeDescriptor;
+                if (!IsCompatibleStatement(elseStmt.TypeDescriptor))
+                {
+                    if (errMsg.Length > 0)
+                    {
+                        errMsg += "\n";
+                    }
+                    errMsg += "Non-compatible ELSE statement type: " +
+                              elseStmt.TypeDescriptor.GetType().Name;
+                }
+            }
+            else { ssDesc.HasElseStmt = false; }
+
+            // if any components have errors, propogate them up the tree
+            if (ifExp.TypeDescriptor is ErrorDescriptor ||
+                thanStmt.TypeDescriptor is ErrorDescriptor ||
+                elseStmt?.TypeDescriptor is ErrorDescriptor)
+            {
+                // creates an error containing any and all errors lower in tree
+                if (ifExp.TypeDescriptor is ErrorDescriptor)
+                {
+                    ssDesc.TypeDescriptor = ifExp.TypeDescriptor;
+                    if (thanStmt.TypeDescriptor is ErrorDescriptor)
+                    {
+                        ((ErrorDescriptor)ssDesc.TypeDescriptor).CombineErrors
+                            ((ErrorDescriptor)thanStmt.TypeDescriptor);
+                    }
+                    if (elseStmt?.TypeDescriptor is ErrorDescriptor)
+                    {
+                        ((ErrorDescriptor)ssDesc.TypeDescriptor).CombineErrors
+                            ((ErrorDescriptor)elseStmt.TypeDescriptor);
+                    }
+                }
+                else if (thanStmt.TypeDescriptor is ErrorDescriptor)
+                {
+                    ssDesc.TypeDescriptor = thanStmt.TypeDescriptor;
+                    if (elseStmt?.TypeDescriptor is ErrorDescriptor)
+                    {
+                        ((ErrorDescriptor)ssDesc.TypeDescriptor).CombineErrors
+                            ((ErrorDescriptor)elseStmt.TypeDescriptor);
+                    }
+                }
+                else
+                {
+                    ssDesc.TypeDescriptor = elseStmt.TypeDescriptor;
+                }
+            }
+            // if IF/THAN/ELSE was incompatible, create new error
+            if (errMsg.Length > 0)
+            {
+                ssDesc.TypeDescriptor = new ErrorDescriptor(errMsg);
+            }
+            // otherwise assign evaluated boolean to selection statement desc
+            else
+            {
+                ssDesc.TypeDescriptor = ifExp.TypeDescriptor;
+            }
+            node.TypeDescriptor = ssDesc;
         }
 
         private void VisitNode(Expression node)
@@ -508,6 +605,12 @@ namespace Project3
 
             return new ErrorDescriptor("Expected QualifiedName, Expression, " +
                 "Literal or Number as Primary Expression");
+        }
+
+        // TODO: this should check for something...
+        private bool IsCompatibleStatement(TypeDescriptor stmt)
+        {
+            return true;
         }
         #endregion Semantics Helpers
 

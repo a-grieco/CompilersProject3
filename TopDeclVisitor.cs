@@ -356,6 +356,11 @@ namespace Project3
             node.Accept(SemanticsVisitor);
         }
 
+        private void VisitNode(SelectionStatement node)
+        {
+            node.Accept(SemanticsVisitor);
+        }
+
         private void VisitNode(Expression node)
         {
             node.Accept(SemanticsVisitor);
