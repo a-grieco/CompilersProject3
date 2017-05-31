@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Project3
 {
@@ -35,7 +36,8 @@ namespace Project3
             }
         }
 
-        // Variable List Declaring
+
+        #region TopDecl Specialized Node Visits
         private void VisitNode(LocalVariableDeclarationStatement node)
         {
             Console.WriteLine("LocalVariableDeclarationStatement node visit " +
@@ -124,9 +126,8 @@ namespace Project3
             VisitChildren(node);
         }
 
-        // TypeDeclaring (n/a only for array and struct types)
+        // TypeDeclaring (n/a only for array and struct types)  // TODO: structs added as requirement
 
-        // ClassDeclaring
         private void VisitNode(ClassDeclaration node)
         {
             Console.WriteLine("ClassDeclaration node visit in TopDeclVisitor");
@@ -162,34 +163,24 @@ namespace Project3
                 (((ClassTypeDescriptor)attr.TypeDescriptor).ClassBody);
 
             AbstractNode fieldDecls = classBody.Child;
-            if (fieldDecls == null)
-            {
-                return;
-            } // grammar allows one class: so if
-            // body is empty, parsing complete
-            AbstractNode fieldDecl = fieldDecls.Child;
-            while (fieldDecl != null)
-            {
-                if (fieldDecl is MethodDeclaration)
-                {
-                    ((MethodDeclaration)fieldDecl).Accept(this);
-                }
-                else if (fieldDecl is FieldVariableDeclaration)
-                {
-                    ((FieldVariableDeclaration)fieldDecl).Accept(this);
-                }
-                else
-                {
-                    throw new ArgumentException("FieldDeclaration should be " +
-                                                "FieldVariableDeclaration or MethodDeclaration");
-                }
-                fieldDecl = fieldDecls.Sib;
-            }
+
+            // grammar allows one class: if body empty, parsing complete
+            if (fieldDecls == null) { return; }
+            fieldDecls.Accept(this);
             Table.closeScope();
             CurrentClass = null;
         }
 
-        // MethodDeclaring
+        private void VisitNode(FieldDeclarations node)
+        {
+            AbstractNode fieldDecl = node.Child;
+            while (fieldDecl != null)
+            {
+                fieldDecl.Accept(this);
+                fieldDecl = fieldDecl.Sib;
+            }
+        }
+
         private void VisitNode(MethodDeclaration node)
         {
             AbstractNode modifiers = node.Child;
@@ -220,17 +211,18 @@ namespace Project3
                                             "be a PrimitiveType or QualifiedName");
             }
 
+            AbstractNode methodDeclaratorName = methodDeclarator.Child;
+            AbstractNode parameterList = methodDeclaratorName.Sib; // may be null
+
             MethodTypeDescriptor descriptor = new MethodTypeDescriptor();
             descriptor.ReturnType = type.TypeDescriptor;
             descriptor.Modifiers = ((Modifiers)modifiers).ModifierTokens;
             descriptor.Locals = new ScopeTable();
             descriptor.IsDefinedIn = CurrentClass;
+            //descriptor.Signature.ParameterTypes = getParameterTypes(parameterList);
 
             Attributes attr = new Attr(descriptor);
             attr.Kind = Kind.MethodType;
-
-            AbstractNode methodDeclaratorName = methodDeclarator.Child;
-            AbstractNode parameterList = methodDeclaratorName.Sib; // may be null
 
             string name = ((Identifier)methodDeclaratorName).ID;
             Table.enter(name, attr);
@@ -241,29 +233,49 @@ namespace Project3
             MethodTypeDescriptor oldCurrentMethod = CurrentMethod;
             CurrentMethod = descriptor;
 
-            descriptor.Signature = new SignatureDescriptor
-                    (descriptor.ReturnType);
+            //descriptor.Signature = new SignatureDescriptor();
             if (parameterList != null)
             {
                 parameterList.Accept(this);
                 descriptor.Signature.ParameterTypes =
-                    getParameterTypes(parameterList);
+                    ((ParameterListTypeDescriptor)
+                    parameterList.TypeDescriptor).ParamTypeDescriptors;
+                //((ParameterListTypeDescriptoriptor)parameterList).TypeDescriptor..
+                // getParameterTypes(parameterList);
+                attr.TypeDescriptor = descriptor;
+                Table.updateValue(name, attr);
+                node.TypeDescriptor = descriptor;
+                node.AttributesRef = Table.lookup(name);
             }
             methodBody.Accept(this);
             CurrentMethod = oldCurrentMethod;
             Table.closeScope();
         }
 
-        private List<TypeDescriptor> getParameterTypes(AbstractNode paramList)
+        private void VisitNode(Block node)
         {
-            List<TypeDescriptor> parameterTypes = new List<TypeDescriptor>();
-            Parameter param = (Parameter)paramList.Child;
-            while (param != null)
+            AbstractNode locVarDeclOrStmt = node.Child;
+            while (locVarDeclOrStmt != null)
             {
-                parameterTypes.Add(param.TypeDescriptor);
-                param = (Parameter)param.Sib;
+                locVarDeclOrStmt.Accept(this);
+                locVarDeclOrStmt = locVarDeclOrStmt.Sib;
             }
-            return parameterTypes;
+        }
+
+        private void VisitNode(ParameterList node)
+        {
+            List<TypeDescriptor> paramTypes = new List<TypeDescriptor>();
+            AbstractNode parameter = node.Child;
+            while (parameter != null)
+            {
+                parameter.Accept(this);
+                paramTypes.Add(parameter.TypeDescriptor);
+                parameter = parameter.Sib;
+            }
+            ParameterListTypeDescriptor paramListDesc =
+                new ParameterListTypeDescriptor();
+            paramListDesc.ParamTypeDescriptors = paramTypes;
+            node.TypeDescriptor = paramListDesc;
         }
 
         private void VisitNode(Parameter node)
@@ -272,14 +284,15 @@ namespace Project3
             AbstractNode identifier = typeSpecifier.Sib;
 
             typeSpecifier.Accept(TypeVisitor);
-            TypeDescriptor declType = typeSpecifier.TypeDescriptor;
+            TypeDescriptor declType = typeSpecifier.Child.TypeDescriptor;
+
+            // TODO: DELETE ME
 
             string id = ((Identifier)identifier).ID;
             if (Table.isDeclaredLocally(id))
             {
-                string message = "Symbol table already contains id: " + id;
-                Console.WriteLine(message); // TODO: delete
-                identifier.TypeDescriptor = new ErrorDescriptor(message);
+                identifier.TypeDescriptor =
+                    new ErrorDescriptor("Duplicate declaration of " + id);
                 identifier.AttributesRef = null;
             }
             else
@@ -291,18 +304,8 @@ namespace Project3
                 identifier.TypeDescriptor = declType;
                 identifier.AttributesRef = attr;
             }
-        }
-
-        private void VisitNode(PrimaryExpression node)
-        {
-            AbstractNode child = node.Child;
-            child.Accept(this);
-            node.TypeDescriptor = child.TypeDescriptor;
-        }
-
-        private void VisitNode(Expression node)
-        {
-            node.Accept(SemanticsVisitor);
+            node.TypeDescriptor = identifier.TypeDescriptor;
+            node.AttributesRef = identifier.AttributesRef;
         }
 
         private void VisitNode(Literal node)
@@ -318,5 +321,52 @@ namespace Project3
             child.AttributesRef.IsAssignable = true;
             node.TypeDescriptor = child.TypeDescriptor;
         }
+
+
+        private void VisitNode(PrimaryExpression node)
+        {
+            AbstractNode child = node.Child;
+            child.Accept(this);
+            node.TypeDescriptor = child.TypeDescriptor;
+        }
+        #endregion TopDecl Specialized Node visits
+
+
+        #region TopDecl Helpers
+        private List<TypeDescriptor> getParameterTypes(AbstractNode paramList)
+        {
+            List<TypeDescriptor> parameterTypes = new List<TypeDescriptor>();
+            if (paramList != null)
+            {
+                Parameter param = (Parameter)paramList.Child;
+                while (param != null)
+                {
+                    parameterTypes.Add(param.TypeDescriptor);
+                    param = (Parameter)param.Sib;
+                }
+            }
+            return parameterTypes;
+        }
+        #endregion TopDecl Helpers
+
+
+        #region TopDecl Travelers
+        private void VisitNode(MethodCall node)
+        {
+            node.Accept(SemanticsVisitor);
+        }
+
+        private void VisitNode(Expression node)
+        {
+            node.Accept(SemanticsVisitor);
+        }
+        #endregion TopDecl Travelers
+
+
+
+
+
+
+
     }
 }

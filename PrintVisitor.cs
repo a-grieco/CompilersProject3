@@ -45,13 +45,33 @@ namespace Project3
         {
             if (node.AttributesRef != null)
             {
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("  " + node.AttributesRef);
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                Console.Write("  " + node.AttributesRef);
+                if (node.TypeDescriptor is ErrorDescriptor)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.Write("  " + node.TypeDescriptor.GetType().Name);
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine(" " + ((ErrorDescriptor)
+                        node.TypeDescriptor).Message);
+                }
+                else { Console.WriteLine();}
             }
             else if (node.TypeDescriptor != null)
             {
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine("  " + node.TypeDescriptor.GetType().Name);
+                if (node.TypeDescriptor is ErrorDescriptor)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.Write("  " + node.TypeDescriptor.GetType().Name);
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine(" " + ((ErrorDescriptor)
+                        node.TypeDescriptor).Message);
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGreen;
+                    Console.WriteLine("  " + node.TypeDescriptor.GetType().Name);
+                }
             }
             else { Console.WriteLine(); }
             Console.ResetColor();

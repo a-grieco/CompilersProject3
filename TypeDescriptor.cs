@@ -1,29 +1,56 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Project3
 {
+
+    static class ErrorList
+    {
+        public static List<ErrorDescriptor> Errors =
+            new List<ErrorDescriptor>();
+
+        public static void Print()
+        {
+            foreach (var error in Errors)
+            {
+                Console.WriteLine(error.Message);
+            }
+        }
+    }
+
     public abstract class TypeDescriptor { }
 
     public class ErrorDescriptor : TypeDescriptor
     {
+        private ErrorDescriptor() { }
+
         public ErrorDescriptor(string msg)
         {
             Message = msg;
+            ErrorList.Errors.Add(this);
         }
 
-        public string Message { get; }
+        public ErrorDescriptor CombineErrors(ErrorDescriptor err)
+        {
+            ErrorDescriptor comboErr = new ErrorDescriptor();
+            comboErr.Message = this.Message + "\n" + err.Message;
+            return comboErr;
+        }
+
+        public string Message { get; private set; }
     }
 
     public class JavaObjectDescriptor : TypeDescriptor { }
 
     public class SignatureDescriptor : TypeDescriptor
     {
-        public TypeDescriptor ReturnType;
+        //public TypeDescriptor ReturnType;
         public List<TypeDescriptor> ParameterTypes { get; set; }
         public SignatureDescriptor Next { get; set; }
 
@@ -32,11 +59,11 @@ namespace Project3
             ParameterTypes = new List<TypeDescriptor>();
         }
 
-        public SignatureDescriptor(TypeDescriptor attrReturnType)
-        {
-            ReturnType = attrReturnType;
-            ParameterTypes = new List<TypeDescriptor>();
-        }
+        //public SignatureDescriptor(TypeDescriptor attrReturnType)
+        //{
+        //    ReturnType = attrReturnType;
+        //    ParameterTypes = new List<TypeDescriptor>();
+        //}
 
         public void AddParameter(TypeDescriptor typeDescriptor)
         {
@@ -47,6 +74,16 @@ namespace Project3
         {
             return ParameterTypes.Count;
         }
+
+        public String ParametersString()
+        {
+            return String.Join(", ", ParameterTypes);
+        }
+    }
+
+    public class ParameterListTypeDescriptor : TypeDescriptor
+    {
+        public List<TypeDescriptor> ParamTypeDescriptors { get; set; }
     }
 
     //public class VariableDeclarationDescriptor : TypeDescriptor { }
@@ -61,6 +98,7 @@ namespace Project3
         public ScopeTable ClassBody { get; set; }
     }
 
+    [DebuggerDisplay("MethodTypeDescriptor: {ReturnType, Signature}")]
     public class MethodTypeDescriptor : TypeDescriptor
     {
         public TypeDescriptor ReturnType { get; set; }
@@ -68,6 +106,11 @@ namespace Project3
         public ScopeTable Locals { get; set; }
         public ClassTypeDescriptor IsDefinedIn { get; set; }
         public SignatureDescriptor Signature { get; set; }
+
+        public MethodTypeDescriptor()
+        {
+            Signature = new SignatureDescriptor();
+        }
     }
 
     public enum PrimitiveTypes { VOID, INT, BOOLEAN, OBJECT }
@@ -76,6 +119,7 @@ namespace Project3
         public virtual PrimitiveTypes PrimitiveTypes { get; }
     }
 
+    [DebuggerDisplay("VOID")]
     public class PrimitiveTypeVoidDescriptor : PrimitiveTypeDescriptor
     {
         public override PrimitiveTypes PrimitiveTypes
@@ -84,6 +128,7 @@ namespace Project3
         }
     }
 
+    [DebuggerDisplay("INT")]
     public class PrimitiveTypeIntDescriptor : PrimitiveTypeDescriptor
     {
         public override PrimitiveTypes PrimitiveTypes
@@ -92,6 +137,7 @@ namespace Project3
         }
     }
 
+    [DebuggerDisplay("BOOLEAN")]
     public class PrimitiveTypeBooleanDescriptor : PrimitiveTypeDescriptor
     {
         public override PrimitiveTypes PrimitiveTypes
@@ -108,6 +154,7 @@ namespace Project3
         }
     }
 
+    [DebuggerDisplay("Number: {Num}")]
     public class NumberTypeDescriptor : TypeDescriptor
     {
         public int Num { get; }
@@ -116,24 +163,6 @@ namespace Project3
             Num = num;
         }
     }
-
-
-    //public class MethodCallDescriptor : TypeDescriptor
-    //{
-    //    public MethodCallDescriptor()
-    //    {
-    //        ExpressionAttributeRef = new List<TypeDescriptor>();
-    //    }
-
-    //    public MethodCallDescriptor(TypeDescriptor methodRefType)
-    //    {
-    //        MethodRecerenceType = methodRefType;
-    //        ExpressionAttributeRef = new List<TypeDescriptor>();
-    //    }
-
-    //    public TypeDescriptor MethodRecerenceType { get; set; }
-    //    public List<TypeDescriptor> ExpressionAttributeRef { get; set; }    // TODO: refactor?
-    //}
 
     public class SpecialNameDescriptor : TypeDescriptor
     {
@@ -147,6 +176,7 @@ namespace Project3
 
     public class NotJustNameDescriptor : TypeDescriptor { }
 
+    [DebuggerDisplay("Literal: {Value}")]
     public class LiteralTypeDescriptor : TypeDescriptor
     {
         public string Value { get; set; }

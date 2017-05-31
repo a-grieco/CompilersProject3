@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
@@ -234,6 +235,7 @@ namespace Project3
         }
     }
 
+    [DebuggerDisplay("QualifiedName: {" + nameof(_stringName) + "}")]
     public class QualifiedName : AbstractNode
     {
         private string _stringName;
@@ -397,6 +399,7 @@ namespace Project3
         EQUALS, OP_LOR, OP_LAND, PIPE, HAT, AND, OP_EQ, OP_NE, OP_GT, OP_LT,
         OP_LE, OP_GE, PLUSOP, MINUSOP, ASTERISK, RSLASH, PERCENT, UNARY, PRIMARY
     }
+    [DebuggerDisplay("Expression: {" + nameof(ExpressionType) + "}")]
     public class Expression : AbstractNode
     {
         public ExpressionEnums ExpressionType { get; }

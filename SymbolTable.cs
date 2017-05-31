@@ -68,26 +68,29 @@ namespace Project3
                 SpecialNameEnums.NULL);
             currScopeTable.Add(spNameNull.Name, spNameNull);
 
-            // WriteLine
+            // Write & WriteLine
             PrimitiveTypeVoidDescriptor returnType = new PrimitiveTypeVoidDescriptor();
             // no parameters
-            SignatureDescriptor sigDescNone = new SignatureDescriptor(returnType);
+            SignatureDescriptor sigDescNone = new SignatureDescriptor();
             // integer parameter
-            SignatureDescriptor sigDescInt = new SignatureDescriptor(returnType);
+            SignatureDescriptor sigDescInt = new SignatureDescriptor();
             sigDescInt.AddParameter(new PrimitiveTypeIntDescriptor());
             // boolean parameter
-            SignatureDescriptor sigDescBoolean = new SignatureDescriptor(returnType);
+            SignatureDescriptor sigDescBoolean = new SignatureDescriptor();
             sigDescBoolean.AddParameter(new PrimitiveTypeBooleanDescriptor());
             // literal parameter (string)
-            SignatureDescriptor sigDescLiteral = new SignatureDescriptor(returnType);
+            SignatureDescriptor sigDescLiteral = new SignatureDescriptor();
             sigDescLiteral.AddParameter(new LiteralTypeDescriptor());
-            // chain signature type descriptors together
+            // chain signature type descriptors together (sigDescNode = first)
             sigDescNone.Next = sigDescInt;
             sigDescInt.Next = sigDescBoolean;
             sigDescBoolean.Next = sigDescLiteral;
-            Attr sigAttr = new Attr(sigDescNone);
-            currScopeTable.Add("Write", sigAttr);
-            currScopeTable.Add("WriteLine", sigAttr);
+            MethodTypeDescriptor methodTypeDescriptor = new MethodTypeDescriptor();
+            methodTypeDescriptor.ReturnType = returnType;
+            methodTypeDescriptor.Signature = sigDescNone;
+            Attr methodAttr = new Attr(methodTypeDescriptor);
+            currScopeTable.Add("Write", methodAttr);
+            currScopeTable.Add("WriteLine", methodAttr);
 
             // TODO: add additional baseline information
 
@@ -99,6 +102,7 @@ namespace Project3
         {
             nestLevel--;
             ScopeTable copy = symbolTable.Pop();
+            Console.WriteLine("JUST POPPED SYMBOL TABLE: now at nest level " + nestLevel);
             return copy.GetCopy();
         }
 
@@ -119,7 +123,7 @@ namespace Project3
                     return scope.Get(id);
                 }
             }
-            throw new System.ArgumentException("Symbol " + id + " not present in table.");
+            return new Attr(new ErrorDescriptor("Undeclared variable: " + id));
         }
 
         // Enter the given symbol information into the symbol table.  If the given
@@ -146,6 +150,18 @@ namespace Project3
             ScopeTable currentScopeTable = symbolTable.Peek();
             return currentScopeTable.Contains(id);
         }
+
+        public Boolean updateValue(string id, Attributes attr)
+        {
+            foreach (var scope in symbolTable)
+            {
+                if (scope.Contains(id))
+                {
+                    return scope.UpdateValue(id, attr);
+                }
+            }
+            return false;
+        }
     }
 
     public class ScopeTable
@@ -155,13 +171,15 @@ namespace Project3
 
         // adds a key/value pair to the symbol table at this scope
         // (keeps the original value if duplicate)
-        public void Add(string key, Attributes val)
+        public TypeDescriptor Add(string key, Attributes val)
         {
             if (_thisScope.ContainsKey(key))
             {
-                throw new System.ArgumentException("Symbol already in table.");
+                return new ErrorDescriptor("Symbol Table already contains " +
+                                           "key: " + key);
             }
             _thisScope.Add(key, val);
+            return null;
         }
 
         // returns the value stored for the given key
@@ -185,6 +203,16 @@ namespace Project3
         {
             return _thisScope.ToDictionary(entry => entry.Key,
                 entry => entry.Value);
+        }
+
+        public bool UpdateValue(string id, Attributes attr)
+        {
+            if (_thisScope.ContainsKey(id))
+            {
+                _thisScope[id] = attr;
+                return true;
+            }
+            return false;
         }
     }
 }

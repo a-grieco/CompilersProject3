@@ -17,7 +17,7 @@ namespace ASTBuilder
         {
             this.Scanner = new TCCLScanner(File.OpenRead(filename));
             this.Parse();
-            PrintTree();
+            //PrintTree();
             DoSemantics();
             PrintTree();
         }
@@ -25,7 +25,7 @@ namespace ASTBuilder
         {
             this.Scanner = new TCCLScanner(strm);
             this.Parse();
-            PrintTree();
+            //PrintTree();
             DoSemantics();
             PrintTree();
         }
@@ -43,10 +43,12 @@ namespace ASTBuilder
             TopDeclVisitor topDeclVisitor = new TopDeclVisitor(symbolTable);
             Console.WriteLine("\nStarting declarations processing");
             topDeclVisitor.CheckSemantics(CurrentSemanticValue);
+            //Console.WriteLine("Errors found:");
+            //ErrorList.Print();
 
-            SemanticsVisitor semanticsVisitor = new SemanticsVisitor(symbolTable);
-            Console.WriteLine("\nStarting semantic checking");
-            semanticsVisitor.CheckSemantics(CurrentSemanticValue);
+            //SemanticsVisitor semanticsVisitor = new SemanticsVisitor(symbolTable);
+            //Console.WriteLine("\nStarting semantic checking");
+            //semanticsVisitor.CheckSemantics(CurrentSemanticValue);
 
         }
 

@@ -7,6 +7,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using ASTBuilder;
 
 namespace Project3
@@ -71,7 +72,7 @@ namespace Project3
                 AbstractNode classBody = identifier.Sib;
 
                 // check modifiers
-                ErrorDescriptor modError = checkModifiers(descriptor.Modifiers);
+                ErrorDescriptor modError = CheckModifiers(descriptor.Modifiers);
                 if (modError != null) { error = modError; }
                 else { classBody.Accept(this); }
             }
@@ -89,33 +90,14 @@ namespace Project3
             if (error != null) { Console.WriteLine(error.Message); }
         }
 
-        private ErrorDescriptor checkModifiers(List<ModifiersEnums> mods)
-        {
-            string message;
-            ErrorDescriptor error = null;
-            if (mods.Contains(ModifiersEnums.PRIVATE) &&
-                    mods.Contains(ModifiersEnums.PUBLIC))
-            {
-                message = "Cannot contain both modifiers PUBLIC and PRVATE.";
-                error = new ErrorDescriptor(message);
-            }
-            if (mods.Count <= 0)
-            {
-                message = "Must contain at least one modifier PUBLIC, " +
-                          "PRIVATE, or STATIC";
-                error = new ErrorDescriptor(message);
-            }
-            return error;
-        }
 
+        #region Semantics Specialized Node Visits
         private void VisitNode(MethodCall node)
         {
             AbstractNode methodReference = node.Child;
             AbstractNode argumentList = methodReference.Sib;    // may be null
 
-            Attributes attr;
-            TypeDescriptor descriptor = null;
-            List<TypeDescriptor> argListTypes = new List<TypeDescriptor>();
+            TypeDescriptor descriptor;
 
             QualifiedName qualifiedName = methodReference as QualifiedName;
             if (qualifiedName == null)
@@ -126,80 +108,54 @@ namespace Project3
             else
             {
                 // get parameters from method call
-                if (argumentList != null)
-                {
-                    AbstractNode expression = argumentList.Child;
-                    while (expression != null)
-                    {
-                        expression.Accept(this);
-                        argListTypes.Add(expression.TypeDescriptor);
-                        expression = expression.Sib;
-                    }
-                }
-                // get parameters (signature) from declared method
-                attr = Table.lookup(qualifiedName.GetStringName());
-                SignatureDescriptor methodSignature =
-                    attr.TypeDescriptor as SignatureDescriptor;
+                List<TypeDescriptor> argListTypes = 
+                    GetParameterTypes(argumentList as ArgumentList);
 
-                if (methodSignature != null)
+                // get parameters (signature) from declared method
+                Attributes attr = Table.lookup(qualifiedName.GetStringName());
+                MethodTypeDescriptor methodDescriptor =
+                    attr.TypeDescriptor as MethodTypeDescriptor;
+
+                if (methodDescriptor != null)
                 {
-                    // check that parameter types match
-                    Boolean isMatch =
-                        checkParameters(methodSignature, argListTypes);
-                    if (isMatch)
+                    SignatureDescriptor methodSignature = methodDescriptor.Signature;
+
+                    if (methodSignature != null &&
+                        ParametersMatch(methodSignature, argListTypes))
                     {
-                        // replace sig parameters & remove Next (no overload)
-                        descriptor = methodSignature;
-                        ((SignatureDescriptor)descriptor).ParameterTypes =
-                            argListTypes;
-                        ((SignatureDescriptor)descriptor).Next = null;
+                        // method descriptor for only current signature 
+                        MethodTypeDescriptor temp = new MethodTypeDescriptor();
+                        temp.ReturnType = methodDescriptor.ReturnType;
+                        temp.Signature.ParameterTypes = argListTypes;
+                        temp.Signature.Next = null;
+                        descriptor = temp;
+                    }
+                    else
+                    {
+                        if (methodSignature == null)
+                        {
+                            descriptor = new ErrorDescriptor
+                                ("No signature found for method: " +
+                                qualifiedName.GetStringName());
+                        }
+                        else
+                        {
+                            descriptor = new ErrorDescriptor
+                                ("No method signature found matching: (" +
+                                String.Join(", ", argListTypes) + ")");
+                        }
                     }
                 }
                 else
                 {
-                    descriptor = new ErrorDescriptor("No signature" +
-                        " found for method: " + qualifiedName.GetStringName());
+                    descriptor = new ErrorDescriptor("Method not declared: " +
+                        qualifiedName.GetStringName());
                 }
-
-                // TODO: remove print
-                ErrorDescriptor error = descriptor as ErrorDescriptor;
-                if (error != null) { Console.WriteLine(error.Message); }
-
                 node.TypeDescriptor = descriptor;
                 Attributes methodCallAttr = new Attr(descriptor);
                 methodCallAttr.Kind = Kind.MethodType;
                 node.AttributesRef = methodCallAttr;
             }
-        }
-
-        private bool checkParameters(SignatureDescriptor sig, List<TypeDescriptor> param)
-        {
-            Boolean matchFound = false;
-            List<TypeDescriptor> sigParam;
-
-            // check each signature type in sig
-            while (sig != null && !matchFound)
-            {
-                matchFound = true;
-                sigParam = sig.ParameterTypes;
-
-                //check current signature parameters against param
-                if (sigParam.Count == param.Count)
-                {
-                    for (int i = 0; i < param.Count; i++)
-                    {
-                        Console.WriteLine(sigParam[i] + " " + param[i]);
-                        if (sigParam[i].GetType() != param[i].GetType())
-                        {
-                            matchFound = false;
-                        }
-                    }
-                }
-                else { matchFound = false; }
-
-                sig = sig.Next; // go to next signature type
-            }
-            return matchFound;
         }
 
         private void VisitNode(Expression node)
@@ -289,82 +245,188 @@ namespace Project3
         {
             node.TypeDescriptor = PrimaryExp(node);
         }
+        #endregion Semantics Specialized Node Visits
+
+
+        #region Semantics Helpers
+        private ErrorDescriptor CheckModifiers(List<ModifiersEnums> mods)
+        {
+            string message;
+            ErrorDescriptor error = null;
+            if (mods.Contains(ModifiersEnums.PRIVATE) &&
+                    mods.Contains(ModifiersEnums.PUBLIC))
+            {
+                message = "Cannot contain both modifiers PUBLIC and PRVATE.";
+                error = new ErrorDescriptor(message);
+            }
+            if (mods.Count <= 0)
+            {
+                message = "Must contain at least one modifier PUBLIC, " +
+                          "PRIVATE, or STATIC";
+                error = new ErrorDescriptor(message);
+            }
+            return error;
+        }
+
+        private bool ParametersMatch(SignatureDescriptor sig,
+            List<TypeDescriptor> param)
+        {
+            Boolean matchFound = false;
+            List<TypeDescriptor> sigParam;
+
+            // check each signature type in sig
+            while (sig != null && !matchFound)
+            {
+                matchFound = true;
+                sigParam = sig.ParameterTypes;
+
+                //check current signature parameters against param
+                if (sigParam.Count == param.Count)
+                {
+                    for (int i = 0; i < param.Count; i++)
+                    {
+                        //Console.Write("Comparing " + sigParam[i].GetType().Name +
+                        //    " & " + param[i].GetType().Name);
+                        if (!TypesCompatible(sigParam[i], param[i]))
+                        {
+                            matchFound = false;
+                        }
+                    }
+                }
+                else { matchFound = false; }
+                //Console.WriteLine(" Match? " + matchFound);
+
+                sig = sig.Next; // go to next signature type
+            }
+            return matchFound;
+        }
+
+        private bool TypesCompatible(TypeDescriptor a, TypeDescriptor b)
+        {
+            Console.WriteLine("a is " + a.GetType() + " b is " + b.GetType());
+
+            return (a.GetType() == b.GetType()) ||
+                (a is PrimitiveTypeIntDescriptor && b is NumberTypeDescriptor) ||
+                (b is PrimitiveTypeIntDescriptor && a is NumberTypeDescriptor);
+        }
+
+        private List<TypeDescriptor> GetParameterTypes(ArgumentList argumentList)
+        {
+            List<TypeDescriptor> types = new List<TypeDescriptor>();
+            if (argumentList != null)
+            {
+                AbstractNode expression = argumentList.Child;
+                while (expression != null)
+                {
+                    expression.Accept(this);
+                    types.Add(expression.TypeDescriptor);
+                    expression = expression.Sib;
+                }
+            }
+            return types;
+        }
 
         private TypeDescriptor AssignmentExp(AbstractNode qualName, AbstractNode exp)
         {
             QualifiedName name = qualName as QualifiedName;
             Expression expression = exp as Expression;
+            PrimaryExpression primaryExp = exp as PrimaryExpression;
 
             Attributes nameAttr;
             TypeDescriptor nameDesc;
-            if (name != null && expression != null)
+
+            if (name != null && (expression != null || primaryExp != null))
             {
                 nameAttr = Table.lookup(name.GetStringName());
-                expression.Accept(this);
+                qualName.AttributesRef = nameAttr;
+                qualName.TypeDescriptor = nameAttr.TypeDescriptor;
 
-                if (nameAttr.IsAssignable)
+                exp.Accept(this);
+
+                // Check for errors
+                // if both types are Error Descriptors, combine errors
+                ErrorDescriptor nameErrDesc =
+                    nameAttr.TypeDescriptor as ErrorDescriptor;
+                ErrorDescriptor expErrDesc =
+                    exp.TypeDescriptor as ErrorDescriptor;
+                if (nameErrDesc != null && expErrDesc != null)
                 {
-                    if (nameAttr.TypeDescriptor is PrimitiveTypeIntDescriptor
-                        && expression.TypeDescriptor is NumberTypeDescriptor)
+                    nameDesc = nameErrDesc.CombineErrors(expErrDesc);
+                }
+                // if one or the other is an error, propagate the error up
+                else if (nameErrDesc != null)
+                {
+                    nameDesc = nameAttr.TypeDescriptor;
+                }
+                else if (expErrDesc != null)
+                {
+                    nameDesc = exp.TypeDescriptor;
+                }
+                // check that the variable being assigned to is assignable
+                else if (nameAttr.IsAssignable)
+                {
+                    // if types compatible, assign successfully assigned type
+                    if (TypesCompatible(nameAttr.TypeDescriptor,
+                        exp.TypeDescriptor))
                     {
                         nameDesc = nameAttr.TypeDescriptor;
                     }
-                    else if (nameAttr.TypeDescriptor.GetType()
-                             == expression.TypeDescriptor.GetType())
-                    {
-                        nameDesc = nameAttr.TypeDescriptor;
-                    }
+                    // otherwise, assign new error for incompatible types
                     else
                     {
-                        string message = "TODO: Add to AssignmentExp in " +
-                                         "Semantics Visitor";
-                        Console.WriteLine(message);
-                        nameDesc = new ErrorDescriptor(message);
+                        nameDesc = new ErrorDescriptor("Cannot assign " +
+                                exp.TypeDescriptor.GetType().Name + " to " +
+                                nameAttr.TypeDescriptor.GetType().Name);
                     }
                 }
-                //   && nameAttr.TypeDescriptor.GetType() ==
-                //    expression.TypeDescriptor.GetType())
-                //{
-                //    nameDesc = nameAttr.TypeDescriptor;
-                //}
+                // variable is not assignable
                 else
                 {
-                    nameDesc = new ErrorDescriptor("Cannot assign " +
-                        expression.TypeDescriptor.GetType().Name + " to " +
-                        nameAttr.TypeDescriptor.GetType().Name);
+                    nameDesc = new ErrorDescriptor(
+                        nameAttr.TypeDescriptor.GetType().Name +
+                        " is not assigable. Cannot assign as " +
+                        exp.TypeDescriptor.GetType().Name);
                 }
             }
+            // Assignment not made up of correct parts
             else
             {
                 string message = "";
-                if (name == null)
+                if (name == null && expression == null)
                 {
-                    message += "EQUALS expression expects QualifiedName on " +
-                               "LHS, but has: " + qualName.NodeType + "\n";
+                    message += "EQUALS expression expects 'QualifiedName' " +
+                               "on LHS, but has: " + qualName.GetType().Name +
+                               " & 'Expression' or 'PrimaryExression' on " +
+                               "RHS, but has " + exp.GetType().Name;
                 }
-                if (expression == null)
+                else if (name == null)
                 {
-                    message += "EQUALS expression expects Expression on " +
-                               "RHS, but has: " + exp.NodeType;
+                    message += "EQUALS expression expects 'QualifiedName' on" +
+                               " LHS, but has: " + qualName.GetType().Name;
+                }
+                else
+                {
+                    message += "EQUALS expression expects 'Expression' or " +
+                               "'PrimaryExpression' on RHS, but has: " +
+                               exp.GetType().Name;
                 }
                 nameDesc = new ErrorDescriptor(message);
             }
             return nameDesc;
         }
 
-        // BoolBinaryExp & EvalBinaryExp = same for now, may change w/code gen
         private TypeDescriptor BoolBinaryExp(AbstractNode lhs,
             AbstractNode rhs, ExpressionEnums op)
         {
             lhs.Accept(this);
             rhs.Accept(this);
 
-            if (lhs.TypeDescriptor.GetType() == rhs.TypeDescriptor.GetType())
+            if (TypesCompatible(lhs.TypeDescriptor, rhs.TypeDescriptor))
             {
-                return lhs.TypeDescriptor;
+                return new PrimitiveTypeBooleanDescriptor();
             }
-            return new ErrorDescriptor("Cannot compare " +
-                lhs.TypeDescriptor.GetType().Name + " with " +
+            return new ErrorDescriptor("Comparison of Incompatible types: " +
+                lhs.TypeDescriptor.GetType().Name + " and " +
                 rhs.TypeDescriptor.GetType().Name);
         }
 
@@ -374,12 +436,27 @@ namespace Project3
             lhs.Accept(this);
             rhs.Accept(this);
 
-            if (lhs.TypeDescriptor.GetType() == rhs.TypeDescriptor.GetType())
+            if (TypesCompatible(lhs.TypeDescriptor, rhs.TypeDescriptor))
             {
                 return lhs.TypeDescriptor;
             }
-            return new ErrorDescriptor("Cannot compare " +
-                lhs.TypeDescriptor.GetType().Name + " with " +
+            if (lhs.TypeDescriptor is ErrorDescriptor &&
+                rhs.TypeDescriptor is ErrorDescriptor)
+            {
+                // combine error messages
+                return ((ErrorDescriptor)lhs.TypeDescriptor).CombineErrors
+                    ((ErrorDescriptor)rhs.TypeDescriptor);
+            }
+            if (lhs.TypeDescriptor is ErrorDescriptor)
+            {
+                return lhs.TypeDescriptor;
+            }
+            if (rhs.TypeDescriptor is ErrorDescriptor)
+            {
+                return rhs.TypeDescriptor;
+            }
+            return new ErrorDescriptor("Incompatible types: " +
+                lhs.TypeDescriptor.GetType().Name + " [" + op + "] " +
                 rhs.TypeDescriptor.GetType().Name);
         }
 
@@ -393,18 +470,51 @@ namespace Project3
                 Attributes attr = Table.lookup(name.GetStringName());
                 return attr.TypeDescriptor;
             }
-            Number num = child as Number;
-            if (num != null)
+            // Special Name
+            SpecialName specialName = child as SpecialName;
+            if (specialName != null)
             {
-                return num.TypeDescriptor;
+                return new ErrorDescriptor("SpecialName not implemented");
             }
+            // Complex Primary
+            Expression exp = child as Expression;
+            if (exp != null)
+            {
+                exp.Accept(this);
+                return exp.TypeDescriptor;
+            }
+            //Complex Primary No Parentheses
             Literal literal = child as Literal;
             if (literal != null)
             {
                 return literal.TypeDescriptor;
             }
-            return new ErrorDescriptor("Expected QualifiedName, Number, or " +
-                                       "literal as Primary Expression");
+            Number num = child as Number;
+            if (num != null)
+            {
+                return num.TypeDescriptor;
+            }
+            FieldAccess fieldAcc = child as FieldAccess;
+            if (fieldAcc != null)
+            {
+                return new ErrorDescriptor("FieldAccess not implemented");
+            }
+            MethodCall methodCall = child as MethodCall;
+            if (methodCall != null)
+            {
+                methodCall.Accept(this);
+                return methodCall.TypeDescriptor;
+            }
+
+            return new ErrorDescriptor("Expected QualifiedName, Expression, " +
+                "Literal or Number as Primary Expression");
         }
+        #endregion Semantics Helpers
+
+
+        #region Semantics Travelers
+        // can't travel away from here, gotta be pulled back by TopDecl
+        #endregion Semantics Travelers
+
     }
 }
