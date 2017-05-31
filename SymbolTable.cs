@@ -102,7 +102,7 @@ namespace Project3
         {
             nestLevel--;
             ScopeTable copy = symbolTable.Pop();
-            Console.WriteLine("JUST POPPED SYMBOL TABLE: now at nest level " + nestLevel);
+            Console.WriteLine("Popped Symbol Table: nest level " + nestLevel);
             return copy.GetCopy();
         }
 

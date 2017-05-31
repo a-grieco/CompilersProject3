@@ -107,15 +107,20 @@ namespace Project3
         }
     }
 
+    public class IterationStatementDescriptor : TypeDescriptor
+    {
+        public TypeDescriptor TypeDescriptor { get; set; }  // for self
+        public TypeDescriptor WhileDescriptor { get; set; } // tracking
+        public TypeDescriptor BodyDescriptor { get; set; }  // tracking
+    }
 
     public class SelectionStatementDescriptor : TypeDescriptor
     {
-        public Boolean IfEval { get; set; }
         public Boolean HasElseStmt { get; set; }
-        public TypeDescriptor TypeDescriptor { get; set; }
-        public TypeDescriptor IfDescriptor { get; set; }
-        public TypeDescriptor ThanDescriptor { get; set; }
-        public TypeDescriptor ElseDescriptor { get; set; }
+        public TypeDescriptor TypeDescriptor { get; set; }  // for self
+        public TypeDescriptor IfDescriptor { get; set; }    // tracking
+        public TypeDescriptor ThanDescriptor { get; set; }  // tracking
+        public TypeDescriptor ElseDescriptor { get; set; }  // tracking
     }
 
     public enum PrimitiveTypes { VOID, INT, BOOLEAN, OBJECT }
@@ -136,6 +141,7 @@ namespace Project3
     [DebuggerDisplay("PrimitiveTypeIntDescriptor (INT)")]
     public class PrimitiveTypeIntDescriptor : PrimitiveTypeDescriptor
     {
+        public int Value { get; set; }
         public override PrimitiveTypes PrimitiveTypes
         {
             get { return PrimitiveTypes.INT; }
@@ -145,6 +151,7 @@ namespace Project3
     [DebuggerDisplay("PrimitiveTypeBooleanDescriptor (BOOLEAN)")]
     public class PrimitiveTypeBooleanDescriptor : PrimitiveTypeDescriptor
     {
+        public Boolean Value { get; set; }
         public override PrimitiveTypes PrimitiveTypes
         {
             get { return PrimitiveTypes.BOOLEAN; }
@@ -182,7 +189,7 @@ namespace Project3
 
     public class NotJustNameDescriptor : TypeDescriptor { }
 
-    [DebuggerDisplay("LiteralTypeDescriptor: {Value}")]
+    [DebuggerDisplay("LiteralTypeDescriptor: {" + nameof(Value) + "}")]
     public class LiteralTypeDescriptor : TypeDescriptor
     {
         public string Value { get; set; }
@@ -195,5 +202,5 @@ namespace Project3
         }
     }
 
-
+    public class EmptyStatementDescriptor : TypeDescriptor { }
 }

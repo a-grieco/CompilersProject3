@@ -321,9 +321,9 @@ namespace Project3
 
     public class EmptyStatement : AbstractNode
     {
-
         public EmptyStatement()
         {
+            TypeDescriptor = new EmptyStatementDescriptor();
         }
     }
 
@@ -460,7 +460,7 @@ namespace Project3
         public Literal(string literal)
         {
             Lit = literal;
-            TypeDescriptor=new LiteralTypeDescriptor(literal);
+            TypeDescriptor = new LiteralTypeDescriptor(literal);
         }
     }
 
@@ -512,7 +512,7 @@ namespace Project3
     public class Number : AbstractNode
     {
         public int Num { get; }
-        
+
         public Number(string intNumber)
         {
             Num = Int32.Parse(intNumber);

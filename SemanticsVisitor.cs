@@ -130,20 +130,17 @@ namespace Project3
                         temp.Signature.Next = null;
                         descriptor = temp;
                     }
+                    else if (methodSignature == null)
+                    {
+                        descriptor = new ErrorDescriptor
+                            ("No signature found for method: " +
+                            qualifiedName.GetStringName());
+                    }
                     else
                     {
-                        if (methodSignature == null)
-                        {
-                            descriptor = new ErrorDescriptor
-                                ("No signature found for method: " +
-                                qualifiedName.GetStringName());
-                        }
-                        else
-                        {
-                            descriptor = new ErrorDescriptor
-                                ("No method signature found matching: (" +
-                                String.Join(", ", argListTypes) + ")");
-                        }
+                        descriptor = new ErrorDescriptor
+                            ("No method signature found matching: (" +
+                            String.Join(", ", argListTypes) + ")");
                     }
                 }
                 else
@@ -158,6 +155,58 @@ namespace Project3
             }
         }
 
+        private void VisitNode(IterationStatement node)
+        {
+            AbstractNode whileExp = node.Child;
+            AbstractNode bodyStmt = whileExp.Sib;
+
+            IterationStatementDescriptor iterDesc =
+                new IterationStatementDescriptor();
+
+            String errMsg = "";
+
+            // while expression
+            whileExp.Accept(this);
+            iterDesc.WhileDescriptor = whileExp.TypeDescriptor;
+            PrimitiveTypeBooleanDescriptor whileBoolDesc =
+                whileExp.TypeDescriptor as PrimitiveTypeBooleanDescriptor;
+            if (whileBoolDesc == null)
+            {
+                iterDesc.TypeDescriptor = new ErrorDescriptor("If statement " +
+                    "does not evaluate to a Boolean expression. (Has type: " +
+                    whileExp.TypeDescriptor.GetType().Name + ")");
+            }
+            // if body stmt empty, infinite loop error
+            bodyStmt.Accept(this);
+            bodyStmt.TypeDescriptor = bodyStmt.Child.TypeDescriptor;
+            iterDesc.BodyDescriptor = bodyStmt.TypeDescriptor;
+
+            // propagate up errors as needed
+            if (iterDesc.WhileDescriptor is ErrorDescriptor ||
+                iterDesc.BodyDescriptor is ErrorDescriptor)
+            {
+                if (iterDesc.WhileDescriptor is ErrorDescriptor)
+                {
+                    iterDesc.TypeDescriptor = iterDesc.WhileDescriptor;
+                    if (iterDesc.BodyDescriptor is ErrorDescriptor)
+                    {
+                        ((ErrorDescriptor)iterDesc.TypeDescriptor).CombineErrors(
+                            (ErrorDescriptor)iterDesc.BodyDescriptor);
+                    }
+                }
+                else
+                {
+                    iterDesc.TypeDescriptor = iterDesc.BodyDescriptor;
+                }
+            }
+            // otherwise assign appropriate iteration statement descriptor
+            else
+            {
+                iterDesc.TypeDescriptor = iterDesc.WhileDescriptor;
+            }
+            node.TypeDescriptor = iterDesc;
+        }
+
         private void VisitNode(SelectionStatement node)
         {
             AbstractNode ifExp = node.Child;
@@ -167,7 +216,6 @@ namespace Project3
             SelectionStatementDescriptor ssDesc =
                 new SelectionStatementDescriptor();
 
-            Boolean ifEval;
             String errMsg = "";
 
             // if expression
@@ -177,12 +225,21 @@ namespace Project3
                 ifExp.TypeDescriptor as PrimitiveTypeBooleanDescriptor;
             if (ifBoolDesc == null)
             {
-                errMsg = "If statement does not evaluate to a Boolean " +
-                          "expression. (Has type: " +
-                          ifExp.TypeDescriptor.GetType().Name + ")" + errMsg;
+                ifExp.TypeDescriptor = new ErrorDescriptor("If statement " +
+                    "does not evaluate to a Boolean expression. (Has type: " +
+                    ifExp.TypeDescriptor.GetType().Name + ")");
             }
             // than statement
             thanStmt.Accept(this);
+            if (thanStmt.TypeDescriptor == null)
+            {
+                thanStmt.TypeDescriptor = thanStmt.Child.TypeDescriptor;
+            }
+            else
+            {   // TODO: delete me unless this actually happens... shouldn't
+                Console.WriteLine("**THAN** STATEMENT WASN'T NULL " +
+                                  "(SelectionStatement node)");
+            }
             ssDesc.ThanDescriptor = thanStmt.TypeDescriptor;
             if (!IsCompatibleStatement(thanStmt.TypeDescriptor))
             {
@@ -195,6 +252,15 @@ namespace Project3
             {
                 elseStmt.Accept(this);
                 ssDesc.HasElseStmt = true;
+                if (elseStmt.TypeDescriptor == null)
+                {
+                    elseStmt.TypeDescriptor = elseStmt.Child.TypeDescriptor;
+                }
+                else
+                {   // TODO: delete me unless this actually happens... shouldn't
+                    Console.WriteLine("**ELSE** STATEMENT WASN'T NULL " +
+                                      "(SelectionStatement node)");
+                }
                 ssDesc.ElseDescriptor = elseStmt.TypeDescriptor;
                 if (!IsCompatibleStatement(elseStmt.TypeDescriptor))
                 {
@@ -243,7 +309,7 @@ namespace Project3
                 }
             }
             // if IF/THAN/ELSE was incompatible, create new error
-            if (errMsg.Length > 0)
+            else if (errMsg.Length > 0)
             {
                 ssDesc.TypeDescriptor = new ErrorDescriptor(errMsg);
             }

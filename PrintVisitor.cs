@@ -166,6 +166,15 @@ namespace Project3
             PrintAttribute(node);
         }
 
+        public void VisitNode(IterationStatement node)
+        {
+            Console.Write("<" + node.ClassName() + ">: ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("WHILE");
+            Console.ResetColor();
+            PrintAttribute(node);
+        }
+
         public void VisitNode(SpecialName node)
         {
             Console.Write("<" + node.ClassName() + ">: ");
