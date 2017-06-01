@@ -12,8 +12,11 @@ using ASTBuilder;
 
 namespace Project3
 {
+
     public class SemanticsVisitor : IReflectiveVisitor
     {
+        public const bool DISPLAY_PROGRESS = false;
+
         public static SymbolTable Table { get; set; }
         public static ClassTypeDescriptor CurrentClass { get; set; }
         public static MethodTypeDescriptor CurrentMethod { get; set; }
@@ -394,7 +397,7 @@ namespace Project3
                         (node.Child, node.Child.Sib, node.ExpressionType);
                     break;
                 case ExpressionEnums.UNARY:
-                    Console.WriteLine(message + " BUT IT SHOULD BE");
+                    Console.WriteLine(message + " BUT IT SHOULD BE");   // TODO
                     node.TypeDescriptor = new ErrorDescriptor(message);
                     break;
                 default:
@@ -444,12 +447,16 @@ namespace Project3
                 sigParam = sig.ParameterTypes;
 
                 //check current signature parameters against param
+                if (DISPLAY_PROGRESS) { Console.WriteLine("Beginning signature comparison:"); }
                 if (sigParam.Count == param.Count)
                 {
                     for (int i = 0; i < param.Count; i++)
                     {
-                        //Console.Write("Comparing " + sigParam[i].GetType().Name +
-                        //    " & " + param[i].GetType().Name);
+                        if (DISPLAY_PROGRESS)
+                        {
+                            Console.Write("\tComparing " + GetSimpleName(sigParam[i]) +
+                                          " & " + GetSimpleName(param[i]));
+                        }
                         if (!TypesCompatible(sigParam[i], param[i]))
                         {
                             matchFound = false;
@@ -457,8 +464,7 @@ namespace Project3
                     }
                 }
                 else { matchFound = false; }
-                //Console.WriteLine(" Match? " + matchFound);
-
+                if (DISPLAY_PROGRESS) { Console.WriteLine(" Match? " + matchFound); }
                 sig = sig.Next; // go to next signature type
             }
             return matchFound;
@@ -466,8 +472,6 @@ namespace Project3
 
         private bool TypesCompatible(TypeDescriptor a, TypeDescriptor b)
         {
-            Console.WriteLine("a is " + a.GetType() + " b is " + b.GetType());
-
             return (a.GetType() == b.GetType()) ||
                 (a is PrimitiveTypeIntDescriptor && b is NumberTypeDescriptor) ||
                 (b is PrimitiveTypeIntDescriptor && a is NumberTypeDescriptor);
@@ -495,12 +499,11 @@ namespace Project3
             Expression expression = exp as Expression;
             PrimaryExpression primaryExp = exp as PrimaryExpression;
 
-            Attributes nameAttr;
             TypeDescriptor nameDesc;
 
             if (name != null && (expression != null || primaryExp != null))
             {
-                nameAttr = Table.lookup(name.GetStringName());
+                Attributes nameAttr = Table.lookup(name.GetStringName());
                 qualName.AttributesRef = nameAttr;
                 qualName.TypeDescriptor = nameAttr.TypeDescriptor;
 
@@ -534,23 +537,22 @@ namespace Project3
                     {
                         nameDesc = GetAssignmentDesc(nameAttr.TypeDescriptor,
                             exp.TypeDescriptor);
-                        // nameDesc = nameAttr.TypeDescriptor;
                     }
                     // otherwise, assign new error for incompatible types
                     else
                     {
-                        nameDesc = new ErrorDescriptor("Cannot assign " +
-                                exp.TypeDescriptor.GetType().Name + " to " +
-                                nameAttr.TypeDescriptor.GetType().Name);
+                        nameDesc = new ErrorDescriptor("Incompatible types: " +
+                            "cannot assign " + GetSimpleName(exp.TypeDescriptor)
+                            + " to " + GetSimpleName(nameAttr.TypeDescriptor) +
+                            " variable");
                     }
                 }
                 // variable is not assignable
                 else
                 {
-                    nameDesc = new ErrorDescriptor(
-                        nameAttr.TypeDescriptor.GetType().Name +
+                    nameDesc = new ErrorDescriptor(nameAttr +
                         " is not assigable. Cannot assign as " +
-                        exp.TypeDescriptor.GetType().Name);
+                        GetSimpleName(exp.TypeDescriptor));
                 }
             }
             // Assignment not made up of correct parts
@@ -584,7 +586,8 @@ namespace Project3
             TypeDescriptor exp)
         {
             // assign integer value
-            int valueInt = 0; // TODO: setting to 0 is not a good solution
+            int valueInt = 0;   // TODO: setting to 0 is not a good solution
+                                // fails if type check is not accurate       
             NumberTypeDescriptor expNum = exp as NumberTypeDescriptor;
             PrimitiveTypeIntDescriptor expInt = exp as PrimitiveTypeIntDescriptor;
             if (expNum != null || expInt != null)
@@ -615,7 +618,7 @@ namespace Project3
             }
 
             // assign string value
-            LiteralTypeDescriptor expLiteral = exp as LiteralTypeDescriptor;    
+            LiteralTypeDescriptor expLiteral = exp as LiteralTypeDescriptor;
             LiteralTypeDescriptor nameLiteral = name as LiteralTypeDescriptor;
             if (expLiteral != null && nameLiteral != null)
             {
@@ -638,9 +641,9 @@ namespace Project3
             {
                 return new PrimitiveTypeBooleanDescriptor();
             }
-            return new ErrorDescriptor("Comparison of Incompatible types: " +
-                lhs.TypeDescriptor.GetType().Name + " and " +
-                rhs.TypeDescriptor.GetType().Name);
+            return new ErrorDescriptor("Comparison of incompatible types: " +
+                GetSimpleName(lhs.TypeDescriptor) + GetOpSymbol(op) +
+                GetSimpleName(rhs.TypeDescriptor));
         }
 
         private TypeDescriptor EvalBinaryExp(AbstractNode lhs, AbstractNode rhs,
@@ -668,9 +671,13 @@ namespace Project3
             {
                 return rhs.TypeDescriptor;
             }
-            return new ErrorDescriptor("Incompatible types: " +
-                lhs.TypeDescriptor.GetType().Name + " [" + op + "] " +
-                rhs.TypeDescriptor.GetType().Name);
+            // Otherwise return incompatible types error
+            string err = (GetOpName(op).Length > 0) ?
+                "attempted " + GetOpName(op) + ": " : "attempted: ";
+            err = "Evaluation of incompatible types, " + err +
+                GetSimpleName(lhs.TypeDescriptor) + GetOpSymbol(op) +
+                GetSimpleName(rhs.TypeDescriptor);
+            return new ErrorDescriptor(err);
         }
 
         private TypeDescriptor PrimaryExp(AbstractNode node)
@@ -723,10 +730,109 @@ namespace Project3
                 "Literal or Number as Primary Expression");
         }
 
-        // TODO: this should check for something...
+        // TODO: are additional checks needed for statements?
         private bool IsCompatibleStatement(TypeDescriptor stmt)
         {
             return true;
+        }
+
+        private string GetSimpleName(TypeDescriptor desc)
+        {
+            if (desc is PrimitiveTypeBooleanDescriptor)
+            {
+                return "Boolean";
+            }
+            if (desc is PrimitiveTypeIntDescriptor)
+            {
+                return "Integer";
+            }
+            if (desc is LiteralTypeDescriptor)
+            {
+                return "String";
+            }
+            return desc.GetType().Name;
+        }
+
+        private string GetOpName(ExpressionEnums op)
+        {
+            switch (op)
+            {
+                case ExpressionEnums.EQUALS:
+                    return "assignment";
+                case ExpressionEnums.OP_LOR:
+                    return "comparison";
+                case ExpressionEnums.OP_LAND:
+                    return "comparison";
+                case ExpressionEnums.HAT:
+                    return "exponentiation";
+                case ExpressionEnums.OP_EQ:
+                    return "comparison";
+                case ExpressionEnums.OP_NE:
+                    return "comparison";
+                case ExpressionEnums.OP_GT:
+                    return "comparison";
+                case ExpressionEnums.OP_LT:
+                    return "comparison";
+                case ExpressionEnums.OP_LE:
+                    return "comparison";
+                case ExpressionEnums.OP_GE:
+                    return "comparison";
+                case ExpressionEnums.PLUSOP:
+                    return "addition";
+                case ExpressionEnums.MINUSOP:
+                    return "subtraction";
+                case ExpressionEnums.ASTERISK:
+                    return "multiplication";
+                case ExpressionEnums.RSLASH:
+                    return "division";
+                case ExpressionEnums.PERCENT:
+                    return "mod";
+                default:
+                    return "[" + op + "]";
+            }
+        }
+
+        private string GetOpSymbol(ExpressionEnums op)
+        {
+            switch (op)
+            {
+                case ExpressionEnums.EQUALS:
+                    return " = ";
+                case ExpressionEnums.OP_LOR:
+                    return " || ";
+                case ExpressionEnums.OP_LAND:
+                    return " && ";
+                case ExpressionEnums.PIPE:
+                    return " | ";
+                case ExpressionEnums.HAT:
+                    return " ^ ";
+                case ExpressionEnums.AND:
+                    return " & ";
+                case ExpressionEnums.OP_EQ:
+                    return " == ";
+                case ExpressionEnums.OP_NE:
+                    return " != ";
+                case ExpressionEnums.OP_GT:
+                    return " > ";
+                case ExpressionEnums.OP_LT:
+                    return " < ";
+                case ExpressionEnums.OP_LE:
+                    return " <= ";
+                case ExpressionEnums.OP_GE:
+                    return " >= ";
+                case ExpressionEnums.PLUSOP:
+                    return " + ";
+                case ExpressionEnums.MINUSOP:
+                    return " - ";
+                case ExpressionEnums.ASTERISK:
+                    return " * ";
+                case ExpressionEnums.RSLASH:
+                    return " / ";
+                case ExpressionEnums.PERCENT:
+                    return " % ";
+                default:
+                    return "[" + op + "]";
+            }
         }
         #endregion Semantics Helpers
 
