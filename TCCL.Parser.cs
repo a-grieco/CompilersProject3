@@ -17,7 +17,6 @@ namespace ASTBuilder
         {
             this.Scanner = new TCCLScanner(File.OpenRead(filename));
             this.Parse();
-            //PrintTree();
             DoSemantics();
             PrintTree();
         }
@@ -25,14 +24,13 @@ namespace ASTBuilder
         {
             this.Scanner = new TCCLScanner(strm);
             this.Parse();
-            //PrintTree();
             DoSemantics();
             PrintTree();
         }
         public void PrintTree()
         {
             PrintVisitor visitor = new PrintVisitor();
-            Console.WriteLine("Starting to print AST ");
+            Console.WriteLine("\nStarting to print AST ");
             visitor.PrintTree(CurrentSemanticValue);
         }
 

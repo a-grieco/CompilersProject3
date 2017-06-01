@@ -15,7 +15,7 @@ namespace Project3
 
     public class SemanticsVisitor : IReflectiveVisitor
     {
-        public const bool DISPLAY_PROGRESS = false;
+        private const bool PRINT_STATUS = false;
 
         public static SymbolTable Table { get; set; }
         public static ClassTypeDescriptor CurrentClass { get; set; }
@@ -60,39 +60,8 @@ namespace Project3
 
         public void VisitNode(AbstractNode node)
         {
-            Console.WriteLine("VisitNode, SemanticsVisitor [" + node.GetType() + "]");
             VisitChildren(node);
         }
-
-        private void VisitNode(ClassDeclaration node)
-        {
-            ErrorDescriptor error = null;
-            ClassTypeDescriptor descriptor = node.TypeDescriptor as ClassTypeDescriptor;
-            if (descriptor != null)
-            {
-                AbstractNode modifiers = node.Child;
-                AbstractNode identifier = modifiers.Sib;
-                AbstractNode classBody = identifier.Sib;
-
-                // check modifiers
-                ErrorDescriptor modError = CheckModifiers(descriptor.Modifiers);
-                if (modError != null) { error = modError; }
-                else { classBody.Accept(this); }
-            }
-            else
-            {
-                error = node.TypeDescriptor as ErrorDescriptor;
-                if (error == null)
-                {
-                    error = new ErrorDescriptor("Type Checking failed at " +
-                                "Class Declaration: node type is '" +
-                                node.TypeDescriptor + "', but should be " +
-                                "'ClassTypeDescriptor' or 'Error'");
-                }
-            }
-            if (error != null) { Console.WriteLine(error.Message); }
-        }
-
 
         #region Semantics Specialized Node Visits
         private void VisitNode(MethodCall node)
@@ -166,8 +135,6 @@ namespace Project3
             IterationStatementDescriptor iterDesc =
                 new IterationStatementDescriptor();
 
-            String errMsg = "";
-
             // while expression
             whileExp.Accept(this);
             iterDesc.WhileDescriptor = whileExp.TypeDescriptor;
@@ -177,7 +144,7 @@ namespace Project3
             {
                 iterDesc.TypeDescriptor = new ErrorDescriptor("If statement " +
                     "does not evaluate to a Boolean expression. (Has type: " +
-                    whileExp.TypeDescriptor.GetType().Name + ")");
+                    GetSimpleName(whileExp.TypeDescriptor) + ")");
             }
             // if body stmt empty, infinite loop error
             bodyStmt.Accept(this);
@@ -234,15 +201,7 @@ namespace Project3
             }
             // than statement
             thanStmt.Accept(this);
-            if (thanStmt.TypeDescriptor == null)
-            {
-                thanStmt.TypeDescriptor = thanStmt.Child.TypeDescriptor;
-            }
-            else
-            {   // TODO: delete me unless this actually happens... shouldn't
-                Console.WriteLine("**THAN** STATEMENT WASN'T NULL " +
-                                  "(SelectionStatement node)");
-            }
+            thanStmt.TypeDescriptor = thanStmt.Child.TypeDescriptor;
             ssDesc.ThanDescriptor = thanStmt.TypeDescriptor;
             if (!IsCompatibleStatement(thanStmt.TypeDescriptor))
             {
@@ -255,15 +214,7 @@ namespace Project3
             {
                 elseStmt.Accept(this);
                 ssDesc.HasElseStmt = true;
-                if (elseStmt.TypeDescriptor == null)
-                {
-                    elseStmt.TypeDescriptor = elseStmt.Child.TypeDescriptor;
-                }
-                else
-                {   // TODO: delete me unless this actually happens... shouldn't
-                    Console.WriteLine("**ELSE** STATEMENT WASN'T NULL " +
-                                      "(SelectionStatement node)");
-                }
+                elseStmt.TypeDescriptor = elseStmt.Child.TypeDescriptor;
                 ssDesc.ElseDescriptor = elseStmt.TypeDescriptor;
                 if (!IsCompatibleStatement(elseStmt.TypeDescriptor))
                 {
@@ -447,12 +398,12 @@ namespace Project3
                 sigParam = sig.ParameterTypes;
 
                 //check current signature parameters against param
-                if (DISPLAY_PROGRESS) { Console.WriteLine("Beginning signature comparison:"); }
+                if (PRINT_STATUS) { Console.WriteLine("   Beginning signature comparison:"); }
                 if (sigParam.Count == param.Count)
                 {
                     for (int i = 0; i < param.Count; i++)
                     {
-                        if (DISPLAY_PROGRESS)
+                        if (PRINT_STATUS)
                         {
                             Console.Write("\tComparing " + GetSimpleName(sigParam[i]) +
                                           " & " + GetSimpleName(param[i]));
@@ -464,7 +415,7 @@ namespace Project3
                     }
                 }
                 else { matchFound = false; }
-                if (DISPLAY_PROGRESS) { Console.WriteLine(" Match? " + matchFound); }
+                if (PRINT_STATUS) { Console.WriteLine(" Match? " + matchFound); }
                 sig = sig.Next; // go to next signature type
             }
             return matchFound;
@@ -654,14 +605,25 @@ namespace Project3
 
             if (TypesCompatible(lhs.TypeDescriptor, rhs.TypeDescriptor))
             {
+                // catch two errors
+                if (lhs.TypeDescriptor is ErrorDescriptor &&
+                    rhs.TypeDescriptor is ErrorDescriptor)
+                {
+                    // combine error messages
+                    return ((ErrorDescriptor)lhs.TypeDescriptor).CombineErrors
+                        ((ErrorDescriptor)rhs.TypeDescriptor);
+                }
+                // change from number to primitive type int where possible
+                if (lhs.TypeDescriptor is PrimitiveTypeIntDescriptor)
+                {
+                    return lhs.TypeDescriptor;
+                }
+                if (rhs.TypeDescriptor is PrimitiveTypeIntDescriptor)
+                {
+                    return rhs.TypeDescriptor;
+                }
+                // otherwise propagate up matching type
                 return lhs.TypeDescriptor;
-            }
-            if (lhs.TypeDescriptor is ErrorDescriptor &&
-                rhs.TypeDescriptor is ErrorDescriptor)
-            {
-                // combine error messages
-                return ((ErrorDescriptor)lhs.TypeDescriptor).CombineErrors
-                    ((ErrorDescriptor)rhs.TypeDescriptor);
             }
             if (lhs.TypeDescriptor is ErrorDescriptor)
             {
@@ -736,8 +698,12 @@ namespace Project3
             return true;
         }
 
-        private string GetSimpleName(TypeDescriptor desc)
+        public string GetSimpleName(TypeDescriptor desc)
         {
+            if (desc == null)
+            {
+                return "<no type assigned>";
+            }
             if (desc is PrimitiveTypeBooleanDescriptor)
             {
                 return "Boolean";

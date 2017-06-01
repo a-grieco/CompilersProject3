@@ -8,29 +8,39 @@ namespace Project3
     {
         private const bool PRINT_STATUS = true;
 
-        private int nestLevel;
+        private int scopeLevel;
         private Stack<ScopeTable> symbolTable;
 
         public SymbolTable()
         {
             symbolTable = new Stack<ScopeTable>();
             openScope();
-            nestLevel = 0;
+            scopeLevel = 0;
         }
 
         // Open a new scope, retaining outer ones
         public void openScope()
         {
-            nestLevel++;
+            scopeLevel++;
             symbolTable.Push(new ScopeTable());
             setBaseline();
+            if (PRINT_STATUS)
+            {
+                Console.WriteLine("   Pushed Symbol Table: scope level " +
+                    scopeLevel);
+            }
         }
 
         public void openScope(ScopeTable scopeTable)
         {
-            nestLevel++;
+            scopeLevel++;
             symbolTable.Push(scopeTable);
             setBaseline();
+            if (PRINT_STATUS)
+            {
+                Console.WriteLine("   Pushed Symbol Table: scope level " +
+                    scopeLevel);
+            }
         }
 
         private void setBaseline()
@@ -100,15 +110,19 @@ namespace Project3
         // Close the innermost scope
         public Dictionary<string, Attributes> closeScope()
         {
-            nestLevel--;
+            scopeLevel--;
             ScopeTable copy = symbolTable.Pop();
-            Console.WriteLine("Popped Symbol Table: nest level " + nestLevel);
+            if (PRINT_STATUS)
+            {
+                Console.WriteLine("   Popped Symbol Table: scope level " +
+                    scopeLevel);
+            }
             return copy.GetCopy();
         }
 
-        public override int CurrentNestLevel
+        public override int CurrentScopeLevel
         {
-            get { return nestLevel; }
+            get { return scopeLevel; }
         }
 
         // Returns the information associated with the innermost currently valid
@@ -127,22 +141,27 @@ namespace Project3
         }
 
         // Enter the given symbol information into the symbol table.  If the given
-        // symbol is already present at the current nest level, throw an exception.
+        // symbol is already present at the current scope level, assign error.
         public void enter(string id, Attributes attr)
         {
             ScopeTable currentScopeTable = symbolTable.Pop();
-            currentScopeTable.Add(id, attr);
+            TypeDescriptor err = currentScopeTable.Add(id, attr);
             symbolTable.Push(currentScopeTable);
+
+            if (err != null) { attr.TypeDescriptor = err; }
             if (PRINT_STATUS)
             {
-                printStatus(id, attr, symbolTable);
+                if (err != null)
+                {
+                    Console.WriteLine(((ErrorDescriptor)err).Message);
+                }
+                else
+                {
+                    Console.WriteLine("[\"" + id + "\"" + ", " + attr + "] " +
+                                   "added to Symbol Table, scope level: " +
+                                   CurrentScopeLevel);
+                }
             }
-        }
-
-        private void printStatus(string id, Attributes attr, Stack<ScopeTable> scopeTables)
-        {
-            Console.WriteLine("[\"" + id + "\"" + ", " + attr + "] added to " +
-                              "Symbol Table, scope level: " + CurrentNestLevel);
         }
 
         public bool isDeclaredLocally(string id)
@@ -205,6 +224,7 @@ namespace Project3
                 entry => entry.Value);
         }
 
+        // updates the attribute of a symbol already in the table
         public bool UpdateValue(string id, Attributes attr)
         {
             if (_thisScope.ContainsKey(id))

@@ -49,11 +49,6 @@ namespace Project3
         public Attr(TypeDescriptor typeDescriptor) : base(typeDescriptor) { }
     }
 
-    //public class GeneralAttributes : Attributes
-    //{
-    //    public GeneralAttributes(TypeDescriptor type) : base(type) { }
-    //}
-
     // LocalVariableDeclarationStatement & FieldVariableDeclaration
     public class VariableDeclarationAttributes : Attributes
     {
@@ -69,17 +64,6 @@ namespace Project3
             return display;
         }
     }
-
-    //public class ClassAttributes : Attributes { }
-
-    //public class MethodAttributes : Attributes
-    //{
-    //    public TypeDescriptor ReturnType { get; set; }
-    //    public List<ModifiersEnums> Modifiers { get; set; }
-    //    public ScopeTable Locals { get; set; }
-    //    public ClassTypeDescriptor IsDefinedIn { get; set; }
-    //    public SignatureDescriptor Signature { get; set; }
-    //}
 
     public class PrimitiveAttributes : Attributes
     {

@@ -22,7 +22,6 @@ namespace Project3
 
         private new void VisitNode(AbstractNode node)
         {
-            Console.WriteLine("VisitNode, TopDeclVisitor [" + node.GetType() + "]");
             VisitChildren(node);
         }
 
@@ -40,12 +39,8 @@ namespace Project3
         #region TopDecl Specialized Node Visits
         private void VisitNode(LocalVariableDeclarationStatement node)
         {
-            Console.WriteLine("LocalVariableDeclarationStatement node visit " +
-                              "in TopDeclVisitor.");
-
             AbstractNode typeSpecifier = node.Child;
             AbstractNode localVariableDeclarators = typeSpecifier.Sib;
-
 
             typeSpecifier.Accept(this);
             TypeDescriptor declType = typeSpecifier.TypeDescriptor;
@@ -56,9 +51,8 @@ namespace Project3
                 Identifier id = (Identifier)identifier;
                 if (Table.isDeclaredLocally(id.ID))
                 {
-                    string message = "Symbol table already contains id: " + id.ID;
-                    Console.WriteLine(message); // TODO: delete
-                    id.TypeDescriptor = new ErrorDescriptor(message);
+                    id.TypeDescriptor = new ErrorDescriptor("Symbol table " +
+                        "already contains id: " + id.ID);
                     id.AttributesRef = null;
                 }
                 else
@@ -79,9 +73,6 @@ namespace Project3
 
         private void VisitNode(FieldVariableDeclaration node)
         {
-            Console.WriteLine("FieldVariableDeclaration node visit " +
-                              "in TopDeclVisitor");
-
             AbstractNode modifiers = node.Child;
             AbstractNode typeSpecifier = modifiers.Sib;
             AbstractNode fieldVarDecls = typeSpecifier.Sib;
@@ -89,81 +80,85 @@ namespace Project3
             typeSpecifier.Accept(TypeVisitor);
 
             TypeDescriptor declType = typeSpecifier.TypeDescriptor;
-            List<ModifiersEnums> modifiersList = ((Modifiers)modifiers).ModifierTokens;
+            List<ModifiersEnums> modifiersList =
+                ((Modifiers)modifiers).ModifierTokens;
 
-            // note: grammar does not allow initialization here, only declaration
+            // note: grammar doesn't allow initialization at declaration
             // add each identifier in the list to the symbol table
             AbstractNode fieldVarDeclName = fieldVarDecls.Child;
             while (fieldVarDeclName != null)
             {
                 Identifier identifier = fieldVarDeclName.Child as Identifier;
-                if (identifier == null) throw new ArgumentNullException(nameof(identifier));
-                string id = identifier.ID;
-                // if declared locally, assign an error node
-                if (Table.isDeclaredLocally(id))
+                if (identifier == null)
                 {
-                    string message = "Variable name cannot be redeclared: " + id;
-                    Console.WriteLine(message); // TODO: delete
-                    identifier.TypeDescriptor = new ErrorDescriptor(message);
-                    identifier.AttributesRef = null;
+                    string msg = "Expected Identifier type, found " +
+                                 nameof(identifier);
+                    fieldVarDeclName.Child.TypeDescriptor =
+                        new ErrorDescriptor(msg);
                 }
                 else
                 {
-                    VariableDeclarationAttributes attr =
-                        new VariableDeclarationAttributes();
-                    attr.Kind = Kind.VariableAttributes;
-                    attr.TypeDescriptor = identifier.TypeDescriptor;
-                    attr.Modifiers = modifiersList;
-                    attr.IsAssignable = true;
-                    Table.enter(id, attr);
-                    Console.WriteLine("Entered into symbol table: " + id +
-                                      " " + attr); // TODO: DELETE
-                    identifier.TypeDescriptor = declType;
-                    identifier.AttributesRef = attr;
+                    string id = identifier.ID;
+                    // if variable already declared locally, assign an error
+                    if (Table.isDeclaredLocally(id))
+                    {
+                        identifier.TypeDescriptor = new ErrorDescriptor(
+                            "Variable name cannot be redeclared: " + id);
+                        identifier.AttributesRef = null;
+                    }
+                    else
+                    {
+                        VariableDeclarationAttributes attr =
+                            new VariableDeclarationAttributes();
+                        attr.Kind = Kind.VariableAttributes;
+                        attr.TypeDescriptor = identifier.TypeDescriptor;
+                        attr.Modifiers = modifiersList;
+                        attr.IsAssignable = true;
+                        Table.enter(id, attr);
+                        identifier.TypeDescriptor = declType;
+                        identifier.AttributesRef = attr;
+                    }
                 }
                 fieldVarDeclName = fieldVarDeclName.Sib;
             }
             VisitChildren(node);
         }
 
-        // TypeDeclaring (n/a only for array and struct types)  // TODO: structs added as requirement
+        // TODO: structs added as requirement
+        // TypeDeclaring (n/a only for array and struct types)  
 
         private void VisitNode(ClassDeclaration node)
         {
-            Console.WriteLine("ClassDeclaration node visit in TopDeclVisitor");
-
             AbstractNode modifiers = node.Child;
             AbstractNode identifier = modifiers.Sib;
             AbstractNode classBody = identifier.Sib;
 
-            ClassTypeDescriptor typeRef = new ClassTypeDescriptor();
-            typeRef.ClassBody = new ScopeTable();
+            ClassTypeDescriptor classDesc = new ClassTypeDescriptor();
+            classDesc.ClassBody = new ScopeTable();
             Modifiers mods = modifiers as Modifiers;
             if (mods != null)
             {
-                typeRef.Modifiers = mods.ModifierTokens;
+                classDesc.Modifiers = mods.ModifierTokens;
             }
             else
             {
-                node.TypeDescriptor =
-                    new ErrorDescriptor("Expected modifier node.");
+                node.TypeDescriptor = new ErrorDescriptor("Expected " +
+                    "modifier node, found: " + nameof(node));
             }
 
             Attr attr = new Attr();
             attr.Kind = Kind.ClassType;
-            attr.TypeDescriptor = typeRef;
+            attr.TypeDescriptor = classDesc;
             string id = ((Identifier)identifier).ID;
             Table.enter(id, attr);
-            CurrentClass = typeRef;
-            node.TypeDescriptor = typeRef; // TODO: check if needed 
-            node.AttributesRef = attr; // (not included in pseudocode)
+            CurrentClass = classDesc;
+            node.TypeDescriptor = classDesc;
+            node.AttributesRef = attr;
 
             // push the class body scope table onto the symbol table stack
             Table.openScope
                 (((ClassTypeDescriptor)attr.TypeDescriptor).ClassBody);
-
             AbstractNode fieldDecls = classBody.Child;
-
             // grammar allows one class: if body empty, parsing complete
             if (fieldDecls == null) { return; }
             fieldDecls.Accept(this);
@@ -188,40 +183,41 @@ namespace Project3
             AbstractNode methodDeclarator = typeSpecifier.Sib;
             AbstractNode methodBody = methodDeclarator.Sib;
 
-            AbstractNode type = typeSpecifier.Child;
-            if (type is PrimitiveTypeVoid)
+            AbstractNode retType = typeSpecifier.Child;
+            if (retType is PrimitiveTypeVoid)
             {
-                ((PrimitiveTypeVoid)type).Accept(TypeVisitor);
+                ((PrimitiveTypeVoid)retType).Accept(TypeVisitor);
             }
-            else if (type is PrimitiveTypeBoolean)
+            else if (retType is PrimitiveTypeBoolean)
             {
-                ((PrimitiveTypeBoolean)type).Accept(TypeVisitor);
+                ((PrimitiveTypeBoolean)retType).Accept(TypeVisitor);
             }
-            else if (type is PrimitiveTypeInt)
+            else if (retType is PrimitiveTypeInt)
             {
-                ((PrimitiveTypeInt)type).Accept(TypeVisitor);
+                ((PrimitiveTypeInt)retType).Accept(TypeVisitor);
             }
-            else if (type is QualifiedName)
+            else if (retType is QualifiedName)
             {
-                ((QualifiedName)type).Accept(TypeVisitor);
+                ((QualifiedName)retType).Accept(TypeVisitor);
             }
             else
             {
-                throw new ArgumentException("Return type of a method must " +
-                                            "be a PrimitiveType or QualifiedName");
+                string msg = "Return type of a method must be a " +
+                             "PrimitiveType or QualifiedName (found: " +
+                             GetSimpleName(retType.TypeDescriptor);
+                retType.TypeDescriptor = new ErrorDescriptor(msg);
             }
 
             AbstractNode methodDeclaratorName = methodDeclarator.Child;
             AbstractNode parameterList = methodDeclaratorName.Sib; // may be null
 
-            MethodTypeDescriptor descriptor = new MethodTypeDescriptor();
-            descriptor.ReturnType = type.TypeDescriptor;
-            descriptor.Modifiers = ((Modifiers)modifiers).ModifierTokens;
-            descriptor.Locals = new ScopeTable();
-            descriptor.IsDefinedIn = CurrentClass;
-            //descriptor.Signature.ParameterTypes = getParameterTypes(parameterList);
+            MethodTypeDescriptor methDesc = new MethodTypeDescriptor();
+            methDesc.ReturnType = retType.TypeDescriptor;
+            methDesc.Modifiers = ((Modifiers)modifiers).ModifierTokens;
+            methDesc.Locals = new ScopeTable();
+            methDesc.IsDefinedIn = CurrentClass;
 
-            Attributes attr = new Attr(descriptor);
+            Attributes attr = new Attr(methDesc);
             attr.Kind = Kind.MethodType;
 
             string name = ((Identifier)methodDeclaratorName).ID;
@@ -229,22 +225,19 @@ namespace Project3
             node.TypeDescriptor = attr.TypeDescriptor;
             node.AttributesRef = attr;
 
-            Table.openScope(descriptor.Locals);
+            Table.openScope(methDesc.Locals);
             MethodTypeDescriptor oldCurrentMethod = CurrentMethod;
-            CurrentMethod = descriptor;
+            CurrentMethod = methDesc;
 
-            //descriptor.Signature = new SignatureDescriptor();
             if (parameterList != null)
             {
                 parameterList.Accept(this);
-                descriptor.Signature.ParameterTypes =
+                methDesc.Signature.ParameterTypes =
                     ((ParameterListTypeDescriptor)
                     parameterList.TypeDescriptor).ParamTypeDescriptors;
-                //((ParameterListTypeDescriptoriptor)parameterList).TypeDescriptor..
-                // getParameterTypes(parameterList);
-                attr.TypeDescriptor = descriptor;
+                attr.TypeDescriptor = methDesc;
                 Table.updateValue(name, attr);
-                node.TypeDescriptor = descriptor;
+                node.TypeDescriptor = methDesc;
                 node.AttributesRef = Table.lookup(name);
             }
             methodBody.Accept(this);
@@ -286,8 +279,6 @@ namespace Project3
             typeSpecifier.Accept(TypeVisitor);
             TypeDescriptor declType = typeSpecifier.Child.TypeDescriptor;
 
-            // TODO: DELETE ME
-
             string id = ((Identifier)identifier).ID;
             if (Table.isDeclaredLocally(id))
             {
@@ -322,7 +313,6 @@ namespace Project3
             node.TypeDescriptor = child.TypeDescriptor;
         }
 
-
         private void VisitNode(PrimaryExpression node)
         {
             AbstractNode child = node.Child;
@@ -333,20 +323,7 @@ namespace Project3
 
 
         #region TopDecl Helpers
-        private List<TypeDescriptor> getParameterTypes(AbstractNode paramList)
-        {
-            List<TypeDescriptor> parameterTypes = new List<TypeDescriptor>();
-            if (paramList != null)
-            {
-                Parameter param = (Parameter)paramList.Child;
-                while (param != null)
-                {
-                    parameterTypes.Add(param.TypeDescriptor);
-                    param = (Parameter)param.Sib;
-                }
-            }
-            return parameterTypes;
-        }
+        // removed (added to grammar-node functionality)
         #endregion TopDecl Helpers
 
 

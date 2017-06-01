@@ -4,12 +4,11 @@ using System.Diagnostics;
 
 namespace Project3
 {
-    [DebuggerDisplay("AbstractNodeType: {ToString()}")]
-
     /* All AST nodes are subclasses of this node.  This node knows how to
      * link itself with other siblings and adopt children. Each node gets 
      * a node number to help identify it distinctly in an AST.  */
 
+    [DebuggerDisplay("AbstractNodeType: {ToString()}")]
     public abstract class AbstractNode : IVisitableNode
     {
         private static int nodeNums = 0;
@@ -173,7 +172,6 @@ namespace Project3
             string ans = this.GetType().ToString();
             return ans;
         }
-
 
         /// <summary>
         /// Visitor pattern component </summary>

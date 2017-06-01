@@ -8,12 +8,12 @@ namespace Project3
 {
     public abstract class AbstractSymbolTable
     {
-        public abstract int CurrentNestLevel { get; }
+        public abstract int CurrentScopeLevel { get; }
 
         public virtual void @out(string s)
         {
             string tab = "";
-            for (int i = 1; i <= CurrentNestLevel; ++i)
+            for (int i = 1; i <= CurrentScopeLevel; ++i)
             {
                 tab += "  ";
             }

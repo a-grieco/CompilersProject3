@@ -14,7 +14,7 @@ namespace Project3
         // Close an existing nested symbol table
         Dictionary<string, Attributes> closeScope();
 
-        int CurrentNestLevel { get; }
+        int CurrentScopeLevel { get; }
 
         Attributes lookup(string id);
 

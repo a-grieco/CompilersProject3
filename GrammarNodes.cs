@@ -30,7 +30,7 @@ namespace Project3
             AbstractNode classBody)
         {
             adoptChildren(modifiers);
-            adoptChildren(identifier);  // TODO: AbstractNode Identifiers
+            adoptChildren(identifier);
             adoptChildren(classBody);
         }
     }
@@ -501,7 +501,7 @@ namespace Project3
 
     public class Identifier : AbstractNode
     {
-        public string ID { get; }  // TODO: Type/Object Attributes?
+        public string ID { get; }
 
         public Identifier(string id)
         {

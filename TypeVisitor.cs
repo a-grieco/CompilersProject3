@@ -4,9 +4,7 @@ namespace Project3
 {
     public class TypeVisitor : SemanticsVisitor
     {
-        public TypeVisitor(SymbolTable st) : base(st)
-        {
-        }
+        public TypeVisitor(SymbolTable st) : base(st) { }
 
         public override void Visit(dynamic node)
         {
@@ -15,7 +13,6 @@ namespace Project3
 
         private new void VisitNode(AbstractNode node)
         {
-            Console.WriteLine("VisitNode, TypeVisitor [" + node.GetType() + "]");
             VisitChildren(node);
         }
 
@@ -32,47 +29,41 @@ namespace Project3
         // Identifier
         private void VisitNode(Identifier node)
         {
-            Console.WriteLine("Identifier node visit in TypeVisitor.");
             Attributes attr = Table.lookup(node.ID);
-            if (attr != null && attr.Kind == Kind.TypeAttributes)
+            if (attr != null && (attr.Kind == Kind.TypeAttributes || 
+                attr.TypeDescriptor is ErrorDescriptor))
             {
                 node.TypeDescriptor = attr.TypeDescriptor;
                 node.AttributesRef = attr;
             }
             else
             {
-                string message = "This identifier is not a type name: "
-                                 + node.ID;
-                Console.WriteLine(message); // TODO: delete me
-                node.TypeDescriptor = new ErrorDescriptor(message);
+                node.TypeDescriptor = new ErrorDescriptor("Identifier " +
+                    node.ID + " not listes as a type.");
                 node.AttributesRef = null;
             }
         }
 
         private void VisitNode(PrimitiveTypeVoid node)
         {
-            Console.WriteLine("PrimitiveTypeVoid node visit in TypeVisitor.");
             Attributes attr = new Attr(node.TypeDescriptor);
             node.AttributesRef = attr;
         }
 
         private void VisitNode(PrimitiveTypeInt node)
         {
-            Console.WriteLine("PrimitiveTypeInt node visit in TypeVisitor.");
             Attributes attr = new Attr(node.TypeDescriptor);
             node.AttributesRef = attr;
         }
 
         private void VisitNode(PrimitiveTypeBoolean node)
         {
-            Console.WriteLine("PrimitiveTypeBoolean node visit in TypeVisitor.");
             Attributes attr = new Attr(node.TypeDescriptor);
             node.AttributesRef = attr;
         }
 
         private void VisitNode(QualifiedName node)
         {
-            Console.WriteLine("QualifiedName in TypeVisitor");
             AbstractNode child = node.Child;
             while (child != null)
             {
@@ -85,7 +76,6 @@ namespace Project3
 
         private void VisitNode(SpecialName node)
         {
-            Console.WriteLine("SpecialName in TypeVisitor");
             Attributes attr = Table.lookup(node.Name.ToString());
             node.TypeDescriptor = attr.TypeDescriptor;
             node.AttributesRef = attr;
@@ -93,7 +83,6 @@ namespace Project3
 
         private void VisitNode(FieldAccess node)
         {
-            Console.WriteLine("FieldAccess in TypeVisitor");
             AbstractNode notJustName = node.Child;
             AbstractNode identifier = notJustName.Sib;
 
