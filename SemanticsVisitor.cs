@@ -532,7 +532,9 @@ namespace Project3
                     if (TypesCompatible(nameAttr.TypeDescriptor,
                         exp.TypeDescriptor))
                     {
-                        nameDesc = nameAttr.TypeDescriptor;
+                        nameDesc = GetAssignmentDesc(nameAttr.TypeDescriptor,
+                            exp.TypeDescriptor);
+                        // nameDesc = nameAttr.TypeDescriptor;
                     }
                     // otherwise, assign new error for incompatible types
                     else
@@ -576,6 +578,54 @@ namespace Project3
                 nameDesc = new ErrorDescriptor(message);
             }
             return nameDesc;
+        }
+
+        private TypeDescriptor GetAssignmentDesc(TypeDescriptor name,
+            TypeDescriptor exp)
+        {
+            // assign integer value
+            int valueInt = 0; // TODO: setting to 0 is not a good solution
+            NumberTypeDescriptor expNum = exp as NumberTypeDescriptor;
+            PrimitiveTypeIntDescriptor expInt = exp as PrimitiveTypeIntDescriptor;
+            if (expNum != null || expInt != null)
+            {
+                if (expNum != null) { valueInt = expNum.Num; }
+                if (expInt != null) { valueInt = expInt.Value; }
+                NumberTypeDescriptor nameNum = name as NumberTypeDescriptor;
+                PrimitiveTypeIntDescriptor nameInt = name as PrimitiveTypeIntDescriptor;
+                if (nameNum != null)
+                {
+                    nameNum.Num = valueInt;
+                    return nameNum;
+                }
+                if (nameInt != null)
+                {
+                    nameInt.Value = valueInt;
+                    return nameInt;
+                }
+            }
+
+            // assign bool value
+            PrimitiveTypeBooleanDescriptor expBoolean = exp as PrimitiveTypeBooleanDescriptor;
+            PrimitiveTypeBooleanDescriptor nameBoolean = name as PrimitiveTypeBooleanDescriptor;
+            if (expBoolean != null && nameBoolean != null)
+            {
+                nameBoolean.Value = expBoolean.Value;
+                return nameBoolean;
+            }
+
+            // assign string value
+            LiteralTypeDescriptor expLiteral = exp as LiteralTypeDescriptor;    
+            LiteralTypeDescriptor nameLiteral = name as LiteralTypeDescriptor;
+            if (expLiteral != null && nameLiteral != null)
+            {
+                nameLiteral.Value = expLiteral.Value;
+                return nameLiteral;
+            }
+
+            // assign an error if value unassignable
+            return new ErrorDescriptor("Assignment of value from " +
+                exp.GetType().Name + " to " + name.GetType().Name + " failed");
         }
 
         private TypeDescriptor BoolBinaryExp(AbstractNode lhs,

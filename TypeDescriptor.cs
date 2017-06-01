@@ -169,7 +169,7 @@ namespace Project3
     [DebuggerDisplay("NumberTypeDescriptor: {" + nameof(Num) + "}")]
     public class NumberTypeDescriptor : TypeDescriptor
     {
-        public int Num { get; }
+        public int Num { get; set; }
         public NumberTypeDescriptor(int num)
         {
             Num = num;

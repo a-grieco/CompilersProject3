@@ -55,7 +55,7 @@ namespace Project3
                     Console.WriteLine(" " + ((ErrorDescriptor)
                         node.TypeDescriptor).Message);
                 }
-                else { Console.WriteLine();}
+                else { Console.WriteLine(); }
             }
             else if (node.TypeDescriptor != null)
             {
@@ -75,6 +75,43 @@ namespace Project3
             }
             else { Console.WriteLine(); }
             Console.ResetColor();
+        }
+
+        private void PrintValue(AbstractNode node)
+        {
+            if (node.TypeDescriptor != null)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                NumberTypeDescriptor num = 
+                    node.TypeDescriptor as NumberTypeDescriptor;
+                if (num != null)
+                {
+                    Console.Write(" " + num.Num);
+                    return;
+                }
+                PrimitiveTypeIntDescriptor primInt = 
+                    node.TypeDescriptor as PrimitiveTypeIntDescriptor;
+                if (primInt != null)
+                {
+                    Console.Write(" " + primInt.Value);
+                    return;
+                }
+                PrimitiveTypeBooleanDescriptor primBool = 
+                    node.TypeDescriptor as PrimitiveTypeBooleanDescriptor;
+                if (primBool != null)
+                {
+                    Console.Write(" " + primBool.Value);
+                    return;
+                }
+                LiteralTypeDescriptor lit = 
+                    node.TypeDescriptor as LiteralTypeDescriptor;
+                if (lit != null)
+                {
+                    Console.Write(" " + lit.Value);
+                    return;
+                }
+                Console.ResetColor();
+            }
         }
 
         public void VisitNode(AbstractNode node)
