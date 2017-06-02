@@ -7,6 +7,7 @@ namespace Project3
     public class SymbolTable : AbstractSymbolTable, ISymbolTable
     {
         private const bool PRINT_STATUS = true;
+        private bool created = false;
 
         private int scopeLevel;
         private Stack<ScopeTable> symbolTable;
@@ -26,8 +27,12 @@ namespace Project3
             setBaseline();
             if (PRINT_STATUS)
             {
-                Console.WriteLine("   Pushed Symbol Table: scope level " +
-                    scopeLevel);
+                if (created)
+                {
+                    Console.WriteLine("   Pushed Symbol Table: scope level " +
+                                      scopeLevel);
+                }
+                else { created = true; }
             }
         }
 

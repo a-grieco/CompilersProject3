@@ -30,7 +30,7 @@ namespace ASTBuilder
         public void PrintTree()
         {
             PrintVisitor visitor = new PrintVisitor();
-            Console.WriteLine("\nStarting to print AST ");
+            Console.WriteLine("\nStarting to print AST\n");
             visitor.PrintTree(CurrentSemanticValue);
         }
 
@@ -39,15 +39,10 @@ namespace ASTBuilder
             SymbolTable symbolTable = new SymbolTable();
 
             TopDeclVisitor topDeclVisitor = new TopDeclVisitor(symbolTable);
-            Console.WriteLine("\nStarting declarations processing");
+            Console.WriteLine("\nStarting declarations processing\n");
             topDeclVisitor.CheckSemantics(CurrentSemanticValue);
-            //Console.WriteLine("Errors found:");
-            //ErrorList.Print();
-
-            //SemanticsVisitor semanticsVisitor = new SemanticsVisitor(symbolTable);
-            //Console.WriteLine("\nStarting semantic checking");
-            //semanticsVisitor.CheckSemantics(CurrentSemanticValue);
-
+            Console.WriteLine("\nErrors found:");
+            ErrorList.Print();
         }
 
 

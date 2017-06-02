@@ -19,7 +19,11 @@ namespace Project3
         {
             foreach (var error in Errors)
             {
-                Console.WriteLine(error.Message);
+                Console.WriteLine("\t" + error.Message);
+            }
+            if (Errors.Count <= 0)
+            {
+                Console.WriteLine("\t<no errors found>");
             }
         }
     }
