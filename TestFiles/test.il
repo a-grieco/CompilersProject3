@@ -1,10 +1,12 @@
-.assembly HelloWorld { }
-.method public static void Main() cil managed
+.class public hello
 {
-	.entrypoint
-	.maxstack 1
-	ldstr "Hello World"
-	call void [mscorlib]System.Console::WriteLine(string)
-	ret
+.method public void main() cil managed
+{
+.entrypoint
+.maxstack 42
+ldstr "Hello, World"
+call void [mscorlib]System.Console::WriteLine(string)
+ret
 
+}
 }

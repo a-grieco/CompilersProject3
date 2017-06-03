@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Project3
+namespace Project4
 {
     public enum Kind { TypeAttributes, VariableAttributes, ClassType, MethodType }
 

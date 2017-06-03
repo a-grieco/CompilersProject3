@@ -53,10 +53,11 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-	<Reference Include="Microsoft.Build.Utilities.v4.0" />
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractSymbolTable.cs" />
+    <Compile Include="CodeGenVisitor.cs" />
     <Compile Include="GplexBuffers.cs" />
     <Compile Include="IDescription.cs" />
     <Compile Include="ISymbolTable.cs" />

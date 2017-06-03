@@ -8,9 +8,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using ASTBuilder;
-using Project3;
+using Project4;
 
-namespace Project3
+namespace Project4
 {
     public class CompilationUnit : AbstractNode
     {
@@ -113,19 +113,6 @@ namespace Project3
         }
     }
 
-    //public class PrimitiveType : AbstractNode, IDescription
-    //{
-    //    public FMNodes.PrimitiveEnums Type { get; set; }
-
-    //    public PrimitiveType(FMNodes.PrimitiveEnums primType)
-    //    {
-    //        Type = primType;
-    //    }
-
-    //    public EntryType EntryType { get; set; }
-    //    public DescriptionEntry DescriptionEntry { get; set; }
-    //}
-
     public class PrimitiveTypeVoid : AbstractNode
     {
         public PrimitiveTypeVoid()
@@ -150,6 +137,14 @@ namespace Project3
         }
     }
 
+    public class PrimitiveTypeString : AbstractNode
+    {
+        public PrimitiveTypeString()
+        {
+            TypeDescriptor = new PrimitiveTypeStringDescriptor();
+        }
+    }
+
     public class FieldVariableDeclarators : AbstractNode
     {
         public FieldVariableDeclarators(AbstractNode fieldVariableDeclaratorName)
@@ -165,7 +160,9 @@ namespace Project3
 
     public class MethodDeclaration : AbstractNode
     {
-        public MethodDeclaration(AbstractNode modifiers, AbstractNode typeSpecifier, AbstractNode methodDeclarator, AbstractNode methodBody)
+        public MethodDeclaration(AbstractNode modifiers, 
+            AbstractNode typeSpecifier, AbstractNode methodDeclarator,
+            AbstractNode methodBody)
         {
             adoptChildren(modifiers);
             adoptChildren(typeSpecifier);
@@ -181,7 +178,8 @@ namespace Project3
             adoptChildren(methodDeclaratorName);
         }
 
-        public MethodDeclarator(AbstractNode methodDeclaratorName, AbstractNode parameterList)
+        public MethodDeclarator(AbstractNode methodDeclaratorName,
+            AbstractNode parameterList)
         {
             adoptChildren(methodDeclaratorName);
             adoptChildren(parameterList);
@@ -223,6 +221,10 @@ namespace Project3
             else if (typeSpecifier is PrimitiveTypeInt)
             {
                 return "INT";
+            }
+            else if (typeSpecifier is PrimitiveTypeString)
+            {
+                return "STRING";
             }
             else if (typeSpecifier is QualifiedName)
             {

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Project3
+namespace Project4
 {
 
     static class ErrorList
@@ -127,7 +127,7 @@ namespace Project3
         public TypeDescriptor ElseDescriptor { get; set; }  // tracking
     }
 
-    public enum PrimitiveTypes { VOID, INT, BOOLEAN, OBJECT }
+    public enum PrimitiveTypes { VOID, INT, BOOLEAN, STRING, OBJECT }
     public abstract class PrimitiveTypeDescriptor : TypeDescriptor
     {
         public virtual PrimitiveTypes PrimitiveTypes { get; }
@@ -159,6 +159,15 @@ namespace Project3
         public override PrimitiveTypes PrimitiveTypes
         {
             get { return PrimitiveTypes.BOOLEAN; }
+        }
+    }
+
+    public class PrimitiveTypeStringDescriptor : PrimitiveTypeDescriptor
+    {
+        public string Value { get; set; }
+        public override PrimitiveTypes PrimitiveTypes
+        {
+            get { return PrimitiveTypes.STRING; }
         }
     }
 

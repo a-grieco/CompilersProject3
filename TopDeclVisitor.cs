@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace Project3
+namespace Project4
 {
     public class TopDeclVisitor : SemanticsVisitor
     {

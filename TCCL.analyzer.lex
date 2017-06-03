@@ -68,6 +68,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 [\[] 		{ return (int)Token.LBRACKET; }
 [\]] 		{ return (int)Token.RBRACKET; }
 "boolean" 	{ return (int)Token.BOOLEAN; }
+[sS]"tring"	{return (int)Token.STRING; }	
 "instanceof" 	{ return (int)Token.INSTANCEOF; }
 "*" 			{ return (int)Token.ASTERISK; }
 "=" 			{ return (int)Token.EQUALS; }

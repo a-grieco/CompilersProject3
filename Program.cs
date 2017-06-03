@@ -54,58 +54,98 @@ namespace ASTBuilder
 
         private const string QUIT = "quit";
 
+        private const Boolean TEST = true;
+
         static void Main(string[] args)
         {
-            var parser = new TCCLParser();
-            bool notQuit = true;
-            string fileName = "";
-
-            while (notQuit)
+            if (TEST)
             {
-                bool fileIsValid = false;
-                while (!fileIsValid)
-                {
-                    Console.Write("Enter the file to parse (or 'quit'): ");
-                    fileName = Console.ReadLine();
-                    if (!string.IsNullOrEmpty(fileName))
-                    {
-                        fileName = fileName.Trim();
 
-                        if (fileName.ToLower().Equals(QUIT))
+                string fileName = "test.il";
+
+                if (File.Exists(fileName)) { File.Delete(fileName); }
+                using (StreamWriter sw = File.CreateText(fileName))
+                {
+                    //sw.WriteLine(".assembly HelloWorld { }\n" +
+                    //    ".method public static void Main() cil managed\n" +
+                    //    "{\n" +
+                    //    "\t.entrypoint\n" +
+                    //    "\t.maxstack 1\n" +
+                    //    "\tldstr \"Hello World\"\n" +
+                    //    "\tcall void [mscorlib]System.Console::WriteLine(string)\n" +
+                    //    "\tret\n" +
+                    //    "\n}");
+
+                    sw.WriteLine(".class public hello\n" +
+                        "{\n" +
+                        ".method public void main() cil managed\n" +
+                        "{\n" +
+                        ".entrypoint\n" +
+                        ".maxstack 42\n" +
+                        "ldstr \"Hello, World\"\n" +
+                        "call void [mscorlib]System.Console::WriteLine(string)\n" +
+                        "ret\n" +
+                        "\n}" +
+                        "\n}");
+                }
+                ILasm(fileName.Substring(0, fileName.Length - ".il".Length));
+            }
+
+            else
+            {
+
+                var parser = new TCCLParser();
+                bool notQuit = true;
+                string fileName = "";
+
+                while (notQuit)
+                {
+                    bool fileIsValid = false;
+                    while (!fileIsValid)
+                    {
+                        Console.Write("Enter the file to parse (or 'quit'): ");
+                        fileName = Console.ReadLine();
+                        if (!string.IsNullOrEmpty(fileName))
                         {
-                            fileIsValid = true;
-                            notQuit = false;
-                        }
-                        else
-                        {
-                            if (fileName.Length < 4 ||
-                                !fileName.Substring(fileName.Length - 4).Equals(".txt"))
-                            {
-                                fileName += ".txt";
-                            }
-                            if (File.Exists(fileName))
+                            fileName = fileName.Trim();
+
+                            if (fileName.ToLower().Equals(QUIT))
                             {
                                 fileIsValid = true;
+                                notQuit = false;
                             }
+                            else
+                            {
+                                if (fileName.Length < 4 ||
+                                    !fileName.Substring(fileName.Length - 4).Equals(".txt"))
+                                {
+                                    fileName += ".txt";
+                                }
+                                if (File.Exists(fileName))
+                                {
+                                    fileIsValid = true;
+                                }
+                            }
+
                         }
-
+                        if (!fileIsValid)
+                        {
+                            Console.WriteLine("Unable to process given file name " +
+                                              "\"{0}\", please try again.", fileName);
+                        }
                     }
-                    if (!fileIsValid)
+
+                    if (notQuit)
                     {
-                        Console.WriteLine("Unable to process given file name " +
-                                          "\"{0}\", please try again.", fileName);
+                        Console.WriteLine("\nCompiling file " + fileName);
+                        parser.Parse(fileName);
+                        Console.WriteLine("\nAST complete");
+                        ILasm(fileName.Substring(0, fileName.Length - ".txt".Length));
                     }
+
+                    Console.WriteLine("\nProgram complete. Press any key to close.");
                 }
 
-                if (notQuit)
-                {
-                    Console.WriteLine("Compiling file " + fileName);
-                    parser.Parse(fileName);
-                    Console.WriteLine("AST complete");
-                    ILasm(fileName.Substring(0, fileName.Length - ".txt".Length));
-                }
-
-                Console.WriteLine("\nProgram complete. Press any key to close.");
             }
         }
     }

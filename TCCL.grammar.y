@@ -1,5 +1,5 @@
 %namespace ASTBuilder
-%using Project3
+%using Project4
 
 %partial
 %parsertype TCCLParser
@@ -13,7 +13,7 @@
 %start CompilationUnit
 
 %token STATIC, STRUCT, QUESTION, RSLASH, MINUSOP, NULL, INT, OP_EQ, OP_LT, COLON, OP_LOR
-%token ELSE, PERCENT, THIS, CLASS, PIPE, PUBLIC, PERIOD, HAT, COMMA, VOID, TILDE
+%token ELSE, PERCENT, THIS, CLASS, PIPE, PUBLIC, PERIOD, HAT, COMMA, VOID, TILDE, STRING
 %token LPAREN, RPAREN, OP_GE, SEMICOLON, IF, NEW, WHILE, PRIVATE, BANG, OP_LE, AND 
 %token LBRACE, RBRACE, LBRACKET, RBRACKET, BOOLEAN, INSTANCEOF, ASTERISK, EQUALS, PLUSOP
 %token RETURN, OP_GT, OP_NE, OP_LAND, INT_NUMBER, IDENTIFIER, LITERAL, SUPER
@@ -89,6 +89,7 @@ ArraySpecifier				: 	TypeName LBRACKET RBRACKET	{ $$ = new ArraySpecifier($1); }
 							
 PrimitiveType				:	BOOLEAN	{ $$ = new PrimitiveTypeBoolean(); }
 							|	INT		{ $$ = new PrimitiveTypeInt(); }
+							|	STRING	{ $$ = new PrimitiveTypeString(); }
 							|	VOID	{ $$ = new PrimitiveTypeVoid(); }
 							;
 

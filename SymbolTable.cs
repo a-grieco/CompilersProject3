@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Project3
+namespace Project4
 {
     public class SymbolTable : AbstractSymbolTable, ISymbolTable
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Project3
+namespace Project4
 {
 	/// <summary> Reflective visitor pattern -- a node must accept a visitor </summary>
 	public interface IVisitableNode

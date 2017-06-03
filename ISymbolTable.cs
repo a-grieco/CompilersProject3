@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Project3
+namespace Project4
 {
     public interface ISymbolTable
     {
