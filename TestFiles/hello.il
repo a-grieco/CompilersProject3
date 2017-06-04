@@ -7,7 +7,7 @@
 .entrypoint
 .maxstack 42
 
-ldstr "Hello, PANDAS! World"
+ldstr "Hello, World"
 call void [mscorlib]System.Console::WriteLine(string)
 ret
 }

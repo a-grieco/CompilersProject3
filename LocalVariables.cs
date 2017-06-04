@@ -35,22 +35,30 @@ namespace Project4
                 LocalVars.Push(scopeList);
             }
 
+            public void AddVariables(List<string> names)
+            {
+                List<string> scopeList = LocalVars.Pop();
+                foreach (var name in names)
+                {
+                    Count++;
+                    scopeList.Add(name);
+                }
+                LocalVars.Push(scopeList);
+            }
+
             public int GetVarLocation(string var)
             {
                 foreach (var scopeList in LocalVars)
                 {
                     if (scopeList.Contains(var))
                     {
+                        // monotonically increasing locations starting at 0
                         return scopeList.IndexOf(var) + 
-                            Count - scopeList.Count;
+                            Count - scopeList.Count;    
                     }
                 }
                 return -1;  // error flag if not found
             }
         }
-        #endregion CodeGen Helpers
-
     }
-
-
 }

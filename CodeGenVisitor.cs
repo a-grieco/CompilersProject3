@@ -140,8 +140,19 @@ namespace Project4
             if (methodName.ToLower().Equals("write") ||
                 methodName.ToLower().Equals("writeline"))
             {
-                CallWrites(methodName.ToLower(), GetIlTypeParams(argumentList));
+                //CallWrites(methodName.ToLower(), GetIlTypeParams(argumentList));
+                CallWrites(methodName.ToLower(), GetIlTypeParams(desc.Signature.ParameterTypes));
             }
+        }
+
+        private string GetIlTypeParams(List<TypeDescriptor> types)
+        {
+            List<String> ilTypes = new List<String>();
+            foreach (var type in types)
+            {
+                ilTypes.Add(GetIlType(type));
+            }
+            return String.Join(" ", ilTypes);
         }
 
         private void VisitNode(LocalVariableDeclarationStatement node)
@@ -163,9 +174,11 @@ namespace Project4
 
             File.WriteLine(".locals init(");
             int count = 0;
+            int location;
             foreach (var name in names)
             {
-                File.Write($"   [{count}] {type} {name}");
+                location = _localVariables.GetVarLocation(name);
+                File.Write($"   [{location}] {type} {name}");
                 File.WriteLine((count < names.Count - 1) ? "," : "");
                 ++count;
             }
@@ -192,11 +205,23 @@ namespace Project4
                 AbstractNode qName = node.Child;
                 AbstractNode rhsExp = qName.Sib;
                 rhsExp.Accept(this);
+
+                //string varName = GetQName(qName);
+                string varName = ((QualifiedName)qName).GetStringName();
+                File.WriteLine("stloc.{0}",
+                    _localVariables.GetVarLocation(varName));
             }
             // Binary Expression
-            ExpressionEnums type = node.ExpressionType;
-            string typeStr = GetIlOp(node.ExpressionType, node.TypeDescriptor);
+            else
+            {
+                string typeStr = GetIlOp(node.ExpressionType, node.TypeDescriptor);
+                AbstractNode lhs = node.Child;
+                AbstractNode rhs = lhs.Sib;
 
+                lhs.Accept(this);
+                rhs.Accept(this);
+                File.WriteLine(typeStr);
+            }
             // Primary Expression
 
         }
@@ -211,7 +236,11 @@ namespace Project4
             File.WriteLine("ldc.i4.s {0}", node.Num);
         }
 
-
+        private void VisitNode(QualifiedName node)
+        {
+            int location = _localVariables.GetVarLocation(node.GetStringName());
+            File.WriteLine("ldloc.{0}", location);
+        }
 
 
 
@@ -313,6 +342,46 @@ namespace Project4
             return "";
         }
 
+        private string GetIlType(TypeDescriptor desc)
+        {
+            // either the return type is a primitive (can get from the signature)
+            PrimitiveTypeIntDescriptor intDesc =
+                desc as PrimitiveTypeIntDescriptor;
+            NumberTypeDescriptor numDesc = desc as NumberTypeDescriptor;
+            if (intDesc != null || numDesc != null)
+            {
+                return "int32";
+            }
+            PrimitiveTypeStringDescriptor stringDesc =
+                desc as PrimitiveTypeStringDescriptor;
+            LiteralTypeDescriptor litDesc = desc as LiteralTypeDescriptor;
+            if (stringDesc != null || litDesc != null)
+            {
+                return "string";
+            }
+            PrimitiveTypeBooleanDescriptor boolDesc =
+                desc as PrimitiveTypeBooleanDescriptor;
+            if (boolDesc != null)
+            {
+                return "bool";
+            }
+            PrimitiveTypeVoidDescriptor voidDesc =
+                desc as PrimitiveTypeVoidDescriptor;
+            if (voidDesc != null)
+            {
+                return "void";
+            }
+
+            // or it is an error
+            ErrorDescriptor err = desc as ErrorDescriptor;
+            if (err != null)
+            {
+                return err.Message;
+            }
+
+            return "";
+        }
+
         private void CallWrites(string writeName, string arg)
         {
             if (writeName.ToLower().Equals("write"))
@@ -361,7 +430,7 @@ namespace Project4
                 case ExpressionEnums.MINUSOP:
                     return "sub";
                 case ExpressionEnums.ASTERISK:
-                    return "nul";
+                    return "mul";
                 case ExpressionEnums.RSLASH:
                     return "div";
                 case ExpressionEnums.PERCENT:
@@ -391,6 +460,24 @@ namespace Project4
         private void SetLocalVarDeclNames(List<string> names)
         {
             _localVariables.AddVariables(names);
+        }
+
+        // TODO: no support for access to nested fields names name.name.etc.
+        // This just returns the full qualified name as a string (will cause 
+        // an error if nested fields exist
+        private string GetQName(AbstractNode qName)
+        {
+            string name = "";
+            AbstractNode identifier = qName.Child;
+            while (identifier != null)
+            {
+                // add a period before any additional names
+                name += (name.Length > 0) ?
+                    "." + ((Identifier)identifier).ID :
+                    ((Identifier)identifier).ID;
+                identifier = identifier.Sib;
+            }
+            return name;
         }
         #endregion CodeGen Helpers
 
