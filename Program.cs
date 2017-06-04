@@ -54,13 +54,12 @@ namespace ASTBuilder
 
         private const string QUIT = "quit";
 
-        private const Boolean TEST = true;
+        private const Boolean TEST = false;
 
         static void Main(string[] args)
         {
             if (TEST)
             {
-
                 string fileName = "test.il";
 
                 if (File.Exists(fileName)) { File.Delete(fileName); }
@@ -76,13 +75,15 @@ namespace ASTBuilder
                     //    "\tret\n" +
                     //    "\n}");
 
-                    sw.WriteLine(".class public hello\n" +
+                    sw.WriteLine(".assembly extern mscorlib {}\n" +
+                        ".assembly addnums {}\n" +  // don't forget 2 headers
+                        ".class public hello\n" +
                         "{\n" +
                         ".method public void main() cil managed\n" +
                         "{\n" +
                         ".entrypoint\n" +
                         ".maxstack 42\n" +
-                        "ldstr \"Hello, World\"\n" +
+                        "ldstr \"Hello, World Test\"\n" +
                         "call void [mscorlib]System.Console::WriteLine(string)\n" +
                         "ret\n" +
                         "\n}" +
@@ -93,7 +94,6 @@ namespace ASTBuilder
 
             else
             {
-
                 var parser = new TCCLParser();
                 bool notQuit = true;
                 string fileName = "";

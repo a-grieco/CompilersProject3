@@ -2,21 +2,22 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Project4;
 
 namespace Project4
 {
-    public class CodeGenVisitor : IReflectiveVisitor
+    public partial class CodeGenVisitor : IReflectiveVisitor
     {
         public TextWriter File { get; set; }
-        private string ilFile = "";
+        private LocalVariables _localVariables;
+        //private static Stack<List<String>> _localVars = new Stack<List<String>>();
 
         public CodeGenVisitor(TextWriter file)
         {
             File = file;
+            _localVariables = new LocalVariables();
         }
 
         public void Visit(dynamic node)
@@ -46,6 +47,13 @@ namespace Project4
 
         private void VisitNode(ClassDeclaration node)
         {
+            // catch errors prior to entering class declaration
+            ErrorDescriptor err = node.TypeDescriptor as ErrorDescriptor;
+            if (err != null)
+            {
+                PrintError(err);
+                return;
+            }
             AbstractNode modifiers = node.Child;
             AbstractNode identifier = modifiers.Sib;
             AbstractNode classBody = identifier.Sib;
@@ -55,6 +63,8 @@ namespace Project4
             string mods = String.Join(" ", desc.Modifiers).ToLower();
             string name = ((Identifier)identifier).ID;
 
+            File.WriteLine(".assembly extern mscorlib {}");
+            File.WriteLine(".assembly addnums {}");
             File.WriteLine(".class {0} {1}", mods, name);
             File.WriteLine("{");
             classBody.Accept(this);
@@ -63,7 +73,14 @@ namespace Project4
 
         private void VisitNode(MethodDeclaration node)
         {
-            File.WriteLine();
+            // catch errors prior to entering method declaration
+            ErrorDescriptor err = node.TypeDescriptor as ErrorDescriptor;
+            if (err != null)
+            {
+                PrintError(err);
+                return;
+            }
+            _localVariables.OpenScope();
             MethodTypeDescriptor desc =
                 node.TypeDescriptor as MethodTypeDescriptor;
             if (desc != null)
@@ -76,21 +93,25 @@ namespace Project4
                 AbstractNode methodDeclaratorName = methodDeclarator.Child;
                 AbstractNode parameterList = methodDeclaratorName.Sib; // may be null
 
+                string name = ((Identifier)methodDeclaratorName).ID;
+                if (!desc.Modifiers.Contains(ModifiersEnums.STATIC) &&
+                    name.ToLower().Equals("main"))
+                {
+                    desc.Modifiers.Add(ModifiersEnums.STATIC);
+                }
                 string mods = String.Join(" ", desc.Modifiers).ToLower();
                 string typeSpec = GetIlType(desc.ReturnType, typeSpecifier);
-                string name = ((Identifier)methodDeclaratorName).ID;
                 string argList = GetIlParams(parameterList);
                 string begin = name.ToLower().Equals("main") ?
                     "\n{\n.entrypoint\n.maxstack 42\n" : "\n{\n.maxstack 42";
-                string end = "ret\n}\n";
+                string end = "ret\n}";
 
                 File.WriteLine($".method {mods} {typeSpec} {name}" +
                           $"({argList}) cil managed {begin}");
                 methodBody.Accept(this);
                 File.WriteLine(end);
+                _localVariables.CloseScope();
             }
-            ErrorDescriptor err = node.TypeDescriptor as ErrorDescriptor;
-            if (err != null) { PrintError(err); }
         }
 
         private void VisitNode(MethodCall node)
@@ -114,26 +135,42 @@ namespace Project4
             string methodName = qualifiedName.GetStringName();
 
             // add arguments
-            //if (argumentList != null) { AddArgs(argumentList as ArgumentList); }
-            if (argumentList != null) { argumentList.Accept(this); }
-
+            argumentList?.Accept(this);
 
             if (methodName.ToLower().Equals("write") ||
                 methodName.ToLower().Equals("writeline"))
             {
                 CallWrites(methodName.ToLower(), GetIlTypeParams(argumentList));
             }
-            //MethodTypeDescriptor desc =
-            //    node.TypeDescriptor as MethodTypeDescriptor;
-            //if (desc != null)
-            //{
-            //    AbstractNode methodReference = node.Child;
-            //    QualifiedName qualifiedName = methodReference as QualifiedName;
-
-            //    string argList = GetArgList(desc.Signature.ParameterTypes);
-            //}
         }
 
+        private void VisitNode(LocalVariableDeclarationStatement node)
+        {
+            // catch errors prior to entering local var decl stmt
+            ErrorDescriptor err = node.TypeDescriptor as ErrorDescriptor;
+            if (err != null)
+            {
+                PrintError(err);
+                return;
+            }
+
+            AbstractNode typeSpecifier = node.Child;
+            AbstractNode localVariableDeclarators = typeSpecifier.Sib;
+
+            string type = GetIlType(typeSpecifier);
+            List<String> names = GetLocalVarDeclNames(localVariableDeclarators);
+            SetLocalVarDeclNames(names);
+
+            File.WriteLine(".locals init(");
+            int count = 0;
+            foreach (var name in names)
+            {
+                File.Write($"   [{count}] {type} {name}");
+                File.WriteLine((count < names.Count - 1) ? "," : "");
+                ++count;
+            }
+            File.WriteLine(")");
+        }
 
 
         private void VisitNode(ArgumentList node)
@@ -149,8 +186,19 @@ namespace Project4
 
         private void VisitNode(Expression node)
         {
+            // Assignment Expression
+            if (node.ExpressionType is ExpressionEnums.EQUALS)
+            {
+                AbstractNode qName = node.Child;
+                AbstractNode rhsExp = qName.Sib;
+                rhsExp.Accept(this);
+            }
+            // Binary Expression
             ExpressionEnums type = node.ExpressionType;
-            string typeStr = GetIlOp(node.ExpressionType);
+            string typeStr = GetIlOp(node.ExpressionType, node.TypeDescriptor);
+
+            // Primary Expression
+
         }
 
         private void VisitNode(Literal node)
@@ -164,78 +212,15 @@ namespace Project4
         }
 
 
-        private string GetIlOp(ExpressionEnums expEnum)
-        {
-            switch (expEnum)
-            {
-                case ExpressionEnums.EQUALS:
-                    return "I don't know";  // TODO
-                case ExpressionEnums.OP_LOR:
-                    return "or";
-                case ExpressionEnums.OP_LAND:
-                    return "and";
-                //case ExpressionEnums.PIPE:
-                //    break;
-                //case ExpressionEnums.HAT:
-                //    break;
-                case ExpressionEnums.AND:
-                    return "and";
-                case ExpressionEnums.OP_EQ:
-                    return "beq <int32(target)>";
-                case ExpressionEnums.OP_NE:
-                    return "bne.un <int32 (target)>";
-                case ExpressionEnums.OP_GT:
-                    return "bgt <int32(target)>";
-                case ExpressionEnums.OP_LT:
-                    return "blt <int32 (target)>";
-                case ExpressionEnums.OP_LE:
-                    return "ble <int32 (target)>";
-                case ExpressionEnums.OP_GE:
-                    return "bge <int32 (target)>";
-                case ExpressionEnums.PLUSOP:
-                    return "add";
-                case ExpressionEnums.MINUSOP:
-                    return "sub";
-                case ExpressionEnums.ASTERISK:
-                    return "nul";
-                case ExpressionEnums.RSLASH:
-                    return "div";
-                case ExpressionEnums.PERCENT:
-                    return "rem";
-                case ExpressionEnums.UNARY:
-                    return "neg";
-                //case ExpressionEnums.PRIMARY:
-                //    break;
-                default:
-                    return "";
-            }
-        }
+
 
 
         #region CodeGen Helpers
-        private string GetMethodDecl(MethodDeclarator node)
-        {
-            if (node != null)
-            {
-                AbstractNode methodRef = node.Child;
-                QualifiedName qualName = methodRef as QualifiedName;
-                if (qualName != null) return qualName.GetStringName();
-            }
-            return "<Insert Method Decl Here>";
-        }
-
-        private string GetArgList(List<TypeDescriptor> signatureParameterTypes)
-        {
-            // TODO: what do parameters look like in CIL!?
-            return "";
-        }
-
         private void PrintError(ErrorDescriptor node)
         {
             File.WriteLine("call void [mscorlib]System.Console::" +
-                $"WriteLine({node.Message})\n");
+                $"WriteLine({node.Message})");
         }
-
 
         private string GetIlParams(AbstractNode argList)
         {
@@ -272,15 +257,8 @@ namespace Project4
 
         private string GetIlTypeParam(AbstractNode node)
         {
-            //Parameter parameter = node as Parameter;
-            //if (node != null)
-            //{
             AbstractNode typeSpecifier = node.Child;
             return $"{GetIlType(typeSpecifier)}";
-            //}
-
-            //PrimaryExpression primary = node as PrimaryExpression;
-
         }
 
         private string GetIlType(AbstractNode node)
@@ -296,7 +274,7 @@ namespace Project4
             NumberTypeDescriptor numDesc = desc as NumberTypeDescriptor;
             if (intDesc != null || numDesc != null)
             {
-                return "int";
+                return "int32";
             }
             PrimitiveTypeStringDescriptor stringDesc =
                 desc as PrimitiveTypeStringDescriptor;
@@ -347,6 +325,72 @@ namespace Project4
                 File.WriteLine("call void " +
                     "[mscorlib]System.Console::WriteLine({0})", arg);
             }
+        }
+
+        // TODO: Add functionaility for strings & bools
+        private string GetIlOp(ExpressionEnums expEnum, TypeDescriptor type)
+        {
+            switch (expEnum)
+            {
+                case ExpressionEnums.EQUALS:
+                    return "I don't know";  // TODO
+                case ExpressionEnums.OP_LOR:
+                    return "or";
+                case ExpressionEnums.OP_LAND:
+                    return "and";
+                //case ExpressionEnums.PIPE:
+                //    break;
+                //case ExpressionEnums.HAT:
+                //    break;
+                case ExpressionEnums.AND:
+                    return "and";
+                case ExpressionEnums.OP_EQ:
+                    return "beq <int32(target)>";
+                case ExpressionEnums.OP_NE:
+                    return "bne <int32 (target)>";
+                case ExpressionEnums.OP_GT:
+                    return "bgt <int32(target)>";
+                case ExpressionEnums.OP_LT:
+                    return "blt <int32 (target)>";
+                case ExpressionEnums.OP_LE:
+                    return "ble <int32 (target)>";
+                case ExpressionEnums.OP_GE:
+                    return "bge <int32 (target)>";
+                case ExpressionEnums.PLUSOP:
+                    return "add";
+                case ExpressionEnums.MINUSOP:
+                    return "sub";
+                case ExpressionEnums.ASTERISK:
+                    return "nul";
+                case ExpressionEnums.RSLASH:
+                    return "div";
+                case ExpressionEnums.PERCENT:
+                    return "rem";
+                case ExpressionEnums.UNARY:
+                    return "neg";
+                //case ExpressionEnums.PRIMARY:
+                //    break;
+                default:
+                    return "";
+            }
+        }
+
+        private List<string> GetLocalVarDeclNames(AbstractNode node)
+        {
+            List<String> names = new List<String>();
+            AbstractNode identifier = node.Child;
+            while (identifier != null)
+            {
+                Identifier id = identifier as Identifier;
+                if (id != null) names.Add(id.ID);
+                identifier = identifier.Sib;
+            }
+            return names;
+        }
+
+        private void SetLocalVarDeclNames(List<string> names)
+        {
+            _localVariables.AddVariables(names);
         }
         #endregion CodeGen Helpers
 

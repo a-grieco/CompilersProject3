@@ -50,12 +50,12 @@ namespace ASTBuilder
 
         private void CreateIlFile()
         {
-            Console.WriteLine("\nCreating .il file");
+            Console.WriteLine("\nCreating .il file\n");
             if (File.Exists(_filename + ".il")) { File.Delete(_filename + ".il"); }
             using (StreamWriter sw = File.CreateText(_filename + ".il"))
             {
-                //CodeGenVisitor codeGenVisitor = new CodeGenVisitor(System.Console.Out);
-                CodeGenVisitor codeGenVisitor = new CodeGenVisitor(sw);
+                CodeGenVisitor codeGenVisitor = new CodeGenVisitor(System.Console.Out);
+                //CodeGenVisitor codeGenVisitor = new CodeGenVisitor(sw);
                 codeGenVisitor.CreateIlFileContent(CurrentSemanticValue);
             }
         }

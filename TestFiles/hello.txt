@@ -4,6 +4,6 @@ public class hello {
 
 	public void main ()
 	{
-		WriteLine("Hello, World");
+		WriteLine("Hello, PANDAS! World");
 	}
 }
