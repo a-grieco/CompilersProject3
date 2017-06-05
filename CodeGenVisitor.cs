@@ -11,13 +11,21 @@ namespace Project4
     public partial class CodeGenVisitor : IReflectiveVisitor
     {
         public TextWriter File { get; set; }
-        private LocalVariables _localVariables;
-        //private static Stack<List<String>> _localVars = new Stack<List<String>>();
+        private readonly LocalVariables _localVariables;
+        private const string IF_FALSE = "if_false_loc";
+        private const string IF_END = "if_end_loc";
+        private int _ifCount;
+        private const string WHILE_COND = "while_cond_loc";
+        private const string WHILE_TRUE = "while_true_loc";
+        private int _whileCount;
+        private string ClassName { get; set; }
 
         public CodeGenVisitor(TextWriter file)
         {
             File = file;
             _localVariables = new LocalVariables();
+            _ifCount = -1;
+            _whileCount = -1;
         }
 
         public void Visit(dynamic node)
@@ -62,6 +70,7 @@ namespace Project4
                 node.TypeDescriptor as ClassTypeDescriptor;
             string mods = String.Join(" ", desc.Modifiers).ToLower();
             string name = ((Identifier)identifier).ID;
+            ClassName = name;
 
             File.WriteLine(".assembly extern mscorlib {}");
             File.WriteLine(".assembly addnums {}");
@@ -94,14 +103,14 @@ namespace Project4
                 AbstractNode parameterList = methodDeclaratorName.Sib; // may be null
 
                 string name = ((Identifier)methodDeclaratorName).ID;
-                if (!desc.Modifiers.Contains(ModifiersEnums.STATIC) &&
-                    name.ToLower().Equals("main"))
+                if (!desc.Modifiers.Contains(ModifiersEnums.STATIC) /*&&
+                    name.ToLower().Equals("main")*/)
                 {
                     desc.Modifiers.Add(ModifiersEnums.STATIC);
                 }
                 string mods = String.Join(" ", desc.Modifiers).ToLower();
                 string typeSpec = GetIlType(desc.ReturnType, typeSpecifier);
-                string argList = GetIlParams(parameterList);
+                string argList = GetIlTypeParams(parameterList);
                 string begin = name.ToLower().Equals("main") ?
                     "\n{\n.entrypoint\n.maxstack 42\n" : "\n{\n.maxstack 42";
                 string end = "ret\n}";
@@ -137,22 +146,21 @@ namespace Project4
             // add arguments
             argumentList?.Accept(this);
 
+            // special calls for Write or WriteLine methods
             if (methodName.ToLower().Equals("write") ||
                 methodName.ToLower().Equals("writeline"))
             {
-                //CallWrites(methodName.ToLower(), GetIlTypeParams(argumentList));
-                CallWrites(methodName.ToLower(), GetIlTypeParams(desc.Signature.ParameterTypes));
+                CallWrites(methodName.ToLower(),
+                    GetIlTypeParams(desc.Signature.ParameterTypes));
             }
-        }
-
-        private string GetIlTypeParams(List<TypeDescriptor> types)
-        {
-            List<String> ilTypes = new List<String>();
-            foreach (var type in types)
+            // call for declared methods w/in program
+            else
             {
-                ilTypes.Add(GetIlType(type));
+                string param = (argumentList == null) ?
+                    "" : GetIlTypeParams(argumentList);
+                File.WriteLine("call {0} {1}::{2}({3})", retType, ClassName,
+                    methodName, param);
             }
-            return String.Join(" ", ilTypes);
         }
 
         private void VisitNode(LocalVariableDeclarationStatement node)
@@ -185,6 +193,37 @@ namespace Project4
             File.WriteLine(")");
         }
 
+        private void VisitNode(SelectionStatement node)
+        {
+            AbstractNode ifExp = node.Child;
+            AbstractNode thanStmt = ifExp.Sib;
+            AbstractNode elseStmt = thanStmt.Sib;   // may be null
+
+            ifExp.Accept(this);
+            ++_ifCount;
+            File.WriteLine("brfalse.s {0}{1}", IF_FALSE, _ifCount);
+
+            thanStmt.Accept(this);
+            File.WriteLine("br.s {0}{1}", IF_END, _ifCount);
+
+            File.WriteLine(IF_FALSE + _ifCount + ":");
+            elseStmt.Accept(this);
+            File.WriteLine(IF_END + _ifCount + ":");
+        }
+
+        private void VisitNode(IterationStatement node)
+        {
+            AbstractNode cond_exp = node.Child;
+            AbstractNode body_stmt = cond_exp.Sib;
+
+            ++_whileCount;
+            File.WriteLine("br.s {0}{1}", WHILE_COND, _whileCount);
+            File.WriteLine(WHILE_TRUE + _whileCount + ":");
+            body_stmt.Accept(this);
+            File.WriteLine(WHILE_COND + _whileCount + ":");
+            cond_exp.Accept(this);
+            File.WriteLine("brtrue.s {0}{1}", WHILE_TRUE, _whileCount);
+        }
 
         private void VisitNode(ArgumentList node)
         {
@@ -282,6 +321,16 @@ namespace Project4
                 parameter = parameter.Sib;
             }
             return String.Join(" ", x);
+        }
+
+        private string GetIlTypeParams(List<TypeDescriptor> types)
+        {
+            List<String> ilTypes = new List<String>();
+            foreach (var type in types)
+            {
+                ilTypes.Add(GetIlType(type));
+            }
+            return String.Join(" ", ilTypes);
         }
 
         private string GetIlTypeParam(AbstractNode node)
@@ -401,8 +450,8 @@ namespace Project4
         {
             switch (expEnum)
             {
-                case ExpressionEnums.EQUALS:
-                    return "I don't know";  // TODO
+                //case ExpressionEnums.EQUALS:
+                //    break; 
                 case ExpressionEnums.OP_LOR:
                     return "or";
                 case ExpressionEnums.OP_LAND:
@@ -414,17 +463,17 @@ namespace Project4
                 case ExpressionEnums.AND:
                     return "and";
                 case ExpressionEnums.OP_EQ:
-                    return "beq <int32(target)>";
+                    return "ceq";
                 case ExpressionEnums.OP_NE:
-                    return "bne <int32 (target)>";
+                    return "cne";
                 case ExpressionEnums.OP_GT:
-                    return "bgt <int32(target)>";
+                    return "cgt";
                 case ExpressionEnums.OP_LT:
-                    return "blt <int32 (target)>";
+                    return "clt";
                 case ExpressionEnums.OP_LE:
-                    return "ble <int32 (target)>";
+                    return "cle";
                 case ExpressionEnums.OP_GE:
-                    return "bge <int32 (target)>";
+                    return "cge";
                 case ExpressionEnums.PLUSOP:
                     return "add";
                 case ExpressionEnums.MINUSOP:
@@ -440,7 +489,7 @@ namespace Project4
                 //case ExpressionEnums.PRIMARY:
                 //    break;
                 default:
-                    return "";
+                    return "something bad happened";
             }
         }
 

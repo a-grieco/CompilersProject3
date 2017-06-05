@@ -63,12 +63,6 @@ namespace Project4
             ParameterTypes = new List<TypeDescriptor>();
         }
 
-        //public SignatureDescriptor(TypeDescriptor attrReturnType)
-        //{
-        //    ReturnType = attrReturnType;
-        //    ParameterTypes = new List<TypeDescriptor>();
-        //}
-
         public void AddParameter(TypeDescriptor typeDescriptor)
         {
             ParameterTypes.Add(typeDescriptor);
