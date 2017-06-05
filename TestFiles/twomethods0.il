@@ -2,14 +2,14 @@
 .assembly addnums {}
 .class public twomethods0
 {
-.method public static void check() cil managed 
+.method public static void check() 
 {
 .maxstack 42
 ldstr "In the check method"
 call void [mscorlib]System.Console::WriteLine(string)
 ret
 }
-.method public static void main() cil managed 
+.method public static void main() 
 {
 .entrypoint
 .maxstack 42

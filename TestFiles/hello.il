@@ -2,7 +2,7 @@
 .assembly addnums {}
 .class public hello
 {
-.method public static void main() cil managed 
+.method public static void main() 
 {
 .entrypoint
 .maxstack 42

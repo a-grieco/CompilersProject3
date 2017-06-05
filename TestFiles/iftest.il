@@ -2,7 +2,7 @@
 .assembly addnums {}
 .class public iftest
 {
-.method public static void main() cil managed 
+.method public static void main() 
 {
 .entrypoint
 .maxstack 42
@@ -11,14 +11,14 @@
    [0] int32 i,
    [1] int32 j
 )
-ldc.i4.s 0
+ldc.i4 0
 stloc.0
-ldc.i4.s 1
+ldc.i4 1
 stloc.1
 ldstr "TCCL if test"
 call void [mscorlib]System.Console::WriteLine(string)
 ldloc.0
-ldc.i4.s 10
+ldc.i4 10
 clt
 brfalse.s if_false_loc0
 ldstr "In then part"
@@ -29,7 +29,7 @@ ldloc.1
 stloc.0
 if_end_loc0:
 ldloc.0
-ldc.i4.s 10
+ldc.i4 10
 ceq
 brfalse.s if_false_loc1
 ldloc.0

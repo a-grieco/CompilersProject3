@@ -19,6 +19,7 @@ namespace Project4
         private const string WHILE_TRUE = "while_true_loc";
         private int _whileCount;
         private string ClassName { get; set; }
+        private int _argCount;
 
         public CodeGenVisitor(TextWriter file)
         {
@@ -26,6 +27,7 @@ namespace Project4
             _localVariables = new LocalVariables();
             _ifCount = -1;
             _whileCount = -1;
+            _argCount = -1;
         }
 
         public void Visit(dynamic node)
@@ -110,13 +112,13 @@ namespace Project4
                 }
                 string mods = String.Join(" ", desc.Modifiers).ToLower();
                 string typeSpec = GetIlType(desc.ReturnType, typeSpecifier);
-                string argList = GetIlTypeParams(parameterList);
+                string argList = GetIlTypeParams(desc.Signature.ParameterTypes);
                 string begin = name.ToLower().Equals("main") ?
                     "\n{\n.entrypoint\n.maxstack 42\n" : "\n{\n.maxstack 42";
                 string end = "ret\n}";
 
                 File.WriteLine($".method {mods} {typeSpec} {name}" +
-                          $"({argList}) cil managed {begin}");
+                          $"({argList}) {begin}");
                 methodBody.Accept(this);
                 File.WriteLine(end);
                 _localVariables.CloseScope();
@@ -272,13 +274,21 @@ namespace Project4
 
         private void VisitNode(Number node)
         {
-            File.WriteLine("ldc.i4.s {0}", node.Num);
+            File.WriteLine("ldc.i4 {0}", node.Num);
         }
 
         private void VisitNode(QualifiedName node)
         {
             int location = _localVariables.GetVarLocation(node.GetStringName());
-            File.WriteLine("ldloc.{0}", location);
+            if (location < 0)
+            {
+                ++_argCount;
+                File.WriteLine("ldarg.{0}", _argCount);
+            }
+            else
+            {
+                File.WriteLine("ldloc.{0}", location);
+            }
         }
 
 
