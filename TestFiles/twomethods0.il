@@ -14,6 +14,7 @@ ret
 .entrypoint
 .maxstack 42
 
+call void twomethods0::check()
 ldstr "Back in main"
 call void [mscorlib]System.Console::WriteLine(string)
 ret
